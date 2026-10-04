@@ -30,6 +30,13 @@ import time
 import datetime
 import urllib.request
 
+# Repo owner — resolved at runtime so the pipeline follows the repos to any
+# GitHub account. Actions sets GITHUB_REPOSITORY_OWNER automatically;
+# VALUATIO_OWNER (repo variable/env) overrides; legacy owner is the fallback.
+_GH_OWNER = (__import__("os").environ.get("VALUATIO_OWNER")
+             or __import__("os").environ.get("GITHUB_REPOSITORY_OWNER")
+             or "GoodGlobeLLC").strip()
+
 EDGAR_UA = "Collin McGough collinmcgough@gmail.com"
 
 # Forms worth surfacing. 10-K/10-Q = earnings (annual/quarterly), 8-K = material
@@ -47,8 +54,8 @@ OUT_PATH = os.path.join(REPO_ROOT, "data", "sec_filings.json")
 # vehicles). This fetcher pulls those lists remotely. Edit the URLs if your repo
 # names / branches differ.
 EQUITY_TICKER_URLS = [
-    "https://raw.githubusercontent.com/GoodGlobeLLC/TRAPP2/main/data/tickers.txt",
-    "https://raw.githubusercontent.com/GoodGlobeLLC/TRAPP2-2/main/data/tickers.txt",
+    f"https://raw.githubusercontent.com/{_GH_OWNER}/TRAPP2/main/data/tickers.txt",
+    f"https://raw.githubusercontent.com/{_GH_OWNER}/TRAPP2-2/main/data/tickers.txt",
 ]
 
 SEC_HEADERS = {"User-Agent": EDGAR_UA, "Accept-Encoding": "gzip, deflate"}
