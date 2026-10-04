@@ -1,0 +1,541 @@
+{
+  "generatedAt": "2026-10-04T18:07:34.122480Z",
+  "source": "wikidata",
+  "tickers": {
+    "AAPL": {
+      "ok": false,
+      "msg": "empty facts for QID Q312",
+      "fetchedAt": "2026-10-04T18:11:51.735482Z"
+    },
+    "MSFT": {
+      "ok": true,
+      "msg": "QID=Q2283, 1 execs, 11 board, 11 products",
+      "fetchedAt": "2026-10-04T18:11:58.450682Z"
+    },
+    "GOOGL": {
+      "ok": true,
+      "msg": "QID=Q95, 1 execs, 0 board, 6 products",
+      "fetchedAt": "2026-10-04T18:12:07.639017Z"
+    },
+    "GOOG": {
+      "ok": true,
+      "msg": "QID=Q95, 1 execs, 0 board, 6 products",
+      "fetchedAt": "2026-10-04T18:12:11.748662Z"
+    },
+    "AMZN": {
+      "ok": true,
+      "msg": "QID=Q3884, 2 execs, 13 board, 13 products",
+      "fetchedAt": "2026-10-04T18:12:16.353373Z"
+    },
+    "META": {
+      "ok": true,
+      "msg": "QID=Q380, 1 execs, 12 board, 5 products",
+      "fetchedAt": "2026-10-04T18:12:23.895830Z"
+    },
+    "TSLA": {
+      "ok": true,
+      "msg": "QID=Q478214, 2 execs, 10 board, 0 products",
+      "fetchedAt": "2026-10-04T18:12:28.062015Z"
+    },
+    "NVDA": {
+      "ok": true,
+      "msg": "QID=Q182477, 1 execs, 10 board, 3 products",
+      "fetchedAt": "2026-10-04T18:12:32.961611Z"
+    },
+    "BRK.B": {
+      "ok": true,
+      "msg": "QID=Q217583, 2 execs, 18 board, 0 products",
+      "fetchedAt": "2026-10-04T18:12:36.386932Z"
+    },
+    "JPM": {
+      "ok": true,
+      "msg": "QID=Q192314, 1 execs, 13 board, 3 products",
+      "fetchedAt": "2026-10-04T18:12:40.413447Z"
+    },
+    "V": {
+      "ok": true,
+      "msg": "QID=Q328840, 3 execs, 12 board, 1 products",
+      "fetchedAt": "2026-10-04T18:12:59.601495Z"
+    },
+    "MA": {
+      "ok": true,
+      "msg": "QID=Q1163715, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:13:11.174966Z"
+    },
+    "WMT": {
+      "ok": true,
+      "msg": "QID=Q483551, 2 execs, 12 board, 1 products",
+      "fetchedAt": "2026-10-04T18:13:15.880280Z"
+    },
+    "PG": {
+      "ok": true,
+      "msg": "QID=Q22673, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:13:26.266937Z"
+    },
+    "JNJ": {
+      "ok": true,
+      "msg": "QID=Q333718, 2 execs, 17 board, 2 products",
+      "fetchedAt": "2026-10-04T18:13:30.766236Z"
+    },
+    "UNH": {
+      "ok": true,
+      "msg": "QID=Q49207, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:13:34.909607Z"
+    },
+    "HD": {
+      "ok": true,
+      "msg": "QID=Q631047, 1 execs, 0 board, 1 products",
+      "fetchedAt": "2026-10-04T18:13:42.040000Z"
+    },
+    "BAC": {
+      "ok": true,
+      "msg": "QID=Q487907, 1 execs, 17 board, 4 products",
+      "fetchedAt": "2026-10-04T18:14:01.441020Z"
+    },
+    "XOM": {
+      "ok": true,
+      "msg": "QID=Q156238, 1 execs, 14 board, 1 products",
+      "fetchedAt": "2026-10-04T18:14:05.538476Z"
+    },
+    "CVX": {
+      "ok": true,
+      "msg": "QID=Q319642, 1 execs, 13 board, 1 products",
+      "fetchedAt": "2026-10-04T18:14:13.363300Z"
+    },
+    "LLY": {
+      "ok": true,
+      "msg": "QID=Q632240, 1 execs, 11 board, 1 products",
+      "fetchedAt": "2026-10-04T18:14:18.606752Z"
+    },
+    "MRK": {
+      "ok": true,
+      "msg": "QID=Q247489, 2 execs, 13 board, 1 products",
+      "fetchedAt": "2026-10-04T18:14:22.224234Z"
+    },
+    "ABBV": {
+      "ok": true,
+      "msg": "QID=Q14662364, 2 execs, 14 board, 2 products",
+      "fetchedAt": "2026-10-04T18:14:26.051113Z"
+    },
+    "PFE": {
+      "ok": true,
+      "msg": "QID=Q206921, 1 execs, 14 board, 5 products",
+      "fetchedAt": "2026-10-04T18:14:30.235969Z"
+    },
+    "PEP": {
+      "ok": true,
+      "msg": "QID=Q117876, 1 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:14:38.549565Z"
+    },
+    "KO": {
+      "ok": true,
+      "msg": "QID=Q186285, 0 execs, 3 board, 0 products",
+      "fetchedAt": "2026-10-04T18:14:52.111316Z"
+    },
+    "COST": {
+      "ok": true,
+      "msg": "QID=Q715583, 1 execs, 13 board, 1 products",
+      "fetchedAt": "2026-10-04T18:14:55.816068Z"
+    },
+    "AVGO": {
+      "ok": true,
+      "msg": "QID=Q790060, 2 execs, 9 board, 1 products",
+      "fetchedAt": "2026-10-04T18:15:09.641329Z"
+    },
+    "ORCL": {
+      "ok": true,
+      "msg": "QID=Q19900, 1 execs, 15 board, 4 products",
+      "fetchedAt": "2026-10-04T18:15:13.336318Z"
+    },
+    "ADBE": {
+      "ok": true,
+      "msg": "QID=Q11463, 1 execs, 11 board, 24 products",
+      "fetchedAt": "2026-10-04T18:15:18.421066Z"
+    },
+    "CRM": {
+      "ok": true,
+      "msg": "QID=Q941127, 1 execs, 0 board, 25 products",
+      "fetchedAt": "2026-10-04T18:15:25.443282Z"
+    },
+    "NFLX": {
+      "ok": true,
+      "msg": "QID=Q907311, 1 execs, 0 board, 3 products",
+      "fetchedAt": "2026-10-04T18:15:27.857224Z"
+    },
+    "AMD": {
+      "ok": true,
+      "msg": "QID=Q128896, 1 execs, 9 board, 6 products",
+      "fetchedAt": "2026-10-04T18:15:31.400755Z"
+    },
+    "INTC": {
+      "ok": true,
+      "msg": "QID=Q248, 9 execs, 11 board, 0 products",
+      "fetchedAt": "2026-10-04T18:15:35.584950Z"
+    },
+    "QCOM": {
+      "ok": true,
+      "msg": "QID=Q544847, 2 execs, 0 board, 5 products",
+      "fetchedAt": "2026-10-04T18:15:39.613530Z"
+    },
+    "CSCO": {
+      "ok": true,
+      "msg": "QID=Q173395, 3 execs, 13 board, 9 products",
+      "fetchedAt": "2026-10-04T18:15:54.132597Z"
+    },
+    "DIS": {
+      "ok": true,
+      "msg": "QID=Q7414, 10 execs, 12 board, 4 products",
+      "fetchedAt": "2026-10-04T18:16:04.798488Z"
+    },
+    "T": {
+      "ok": true,
+      "msg": "QID=Q35476, 1 execs, 13 board, 7 products",
+      "fetchedAt": "2026-10-04T18:16:24.856266Z"
+    },
+    "VZ": {
+      "ok": true,
+      "msg": "QID=Q467752, 1 execs, 11 board, 0 products",
+      "fetchedAt": "2026-10-04T18:16:29.714516Z"
+    },
+    "TMUS": {
+      "ok": true,
+      "msg": "QID=Q3511885, 1 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:16:34.272124Z"
+    },
+    "CMCSA": {
+      "ok": true,
+      "msg": "QID=Q1113804, 1 execs, 10 board, 1 products",
+      "fetchedAt": "2026-10-04T18:16:37.932535Z"
+    },
+    "MCD": {
+      "ok": true,
+      "msg": "QID=Q38076, 1 execs, 0 board, 1 products",
+      "fetchedAt": "2026-10-04T18:16:43.503266Z"
+    },
+    "NKE": {
+      "ok": true,
+      "msg": "QID=Q483915, 1 execs, 12 board, 3 products",
+      "fetchedAt": "2026-10-04T18:16:50.543888Z"
+    },
+    "SBUX": {
+      "ok": true,
+      "msg": "QID=Q37158, 1 execs, 0 board, 2 products",
+      "fetchedAt": "2026-10-04T18:16:54.835151Z"
+    },
+    "BA": {
+      "ok": true,
+      "msg": "QID=Q8766, 13 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:17:07.511019Z"
+    },
+    "CAT": {
+      "ok": true,
+      "msg": "QID=Q459965, 2 execs, 10 board, 0 products",
+      "fetchedAt": "2026-10-04T18:17:32.056747Z"
+    },
+    "GE": {
+      "ok": true,
+      "msg": "QID=Q54173, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:17:43.132413Z"
+    },
+    "MMM": {
+      "ok": true,
+      "msg": "QID=Q159433, 2 execs, 15 board, 0 products",
+      "fetchedAt": "2026-10-04T18:17:48.962331Z"
+    },
+    "HON": {
+      "ok": true,
+      "msg": "QID=Q898208, 1 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:18:01.750041Z"
+    },
+    "LMT": {
+      "ok": true,
+      "msg": "QID=Q7240, 1 execs, 14 board, 1 products",
+      "fetchedAt": "2026-10-04T18:18:05.434850Z"
+    },
+    "RTX": {
+      "ok": true,
+      "msg": "QID=Q89368734, 1 execs, 13 board, 0 products",
+      "fetchedAt": "2026-10-04T18:18:11.586128Z"
+    },
+    "F": {
+      "ok": true,
+      "msg": "QID=Q44294, 2 execs, 15 board, 2 products",
+      "fetchedAt": "2026-10-04T18:18:32.745358Z"
+    },
+    "GM": {
+      "ok": true,
+      "msg": "QID=Q81965, 1 execs, 17 board, 1 products",
+      "fetchedAt": "2026-10-04T18:18:37.226955Z"
+    },
+    "GS": {
+      "ok": true,
+      "msg": "QID=Q193326, 1 execs, 13 board, 2 products",
+      "fetchedAt": "2026-10-04T18:18:43.279053Z"
+    },
+    "MS": {
+      "ok": true,
+      "msg": "QID=Q374740, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:18:54.288149Z"
+    },
+    "C": {
+      "ok": true,
+      "msg": "QID=Q219508, 2 execs, 14 board, 2 products",
+      "fetchedAt": "2026-10-04T18:19:11.562740Z"
+    },
+    "WFC": {
+      "ok": true,
+      "msg": "QID=Q744149, 1 execs, 14 board, 1 products",
+      "fetchedAt": "2026-10-04T18:19:29.447863Z"
+    },
+    "AXP": {
+      "ok": true,
+      "msg": "QID=Q194360, 1 execs, 15 board, 0 products",
+      "fetchedAt": "2026-10-04T18:19:33.366753Z"
+    },
+    "BLK": {
+      "ok": true,
+      "msg": "QID=Q219635, 1 execs, 0 board, 5 products",
+      "fetchedAt": "2026-10-04T18:19:38.353772Z"
+    },
+    "SCHW": {
+      "ok": true,
+      "msg": "QID=Q1066028, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:19:57.089132Z"
+    },
+    "USB": {
+      "ok": true,
+      "msg": "QID=Q2093477, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:20:03.115237Z"
+    },
+    "PNC": {
+      "ok": true,
+      "msg": "QID=Q7185164, 0 execs, 0 board, 1 products",
+      "fetchedAt": "2026-10-04T18:20:08.764061Z"
+    },
+    "COP": {
+      "ok": true,
+      "msg": "QID=Q214763, 1 execs, 13 board, 1 products",
+      "fetchedAt": "2026-10-04T18:20:27.150264Z"
+    },
+    "SLB": {
+      "ok": true,
+      "msg": "QID=Q1425316, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:20:32.807141Z"
+    },
+    "EOG": {
+      "ok": true,
+      "msg": "QID=Q1275577, 0 execs, 0 board, 2 products",
+      "fetchedAt": "2026-10-04T18:20:50.685730Z"
+    },
+    "MPC": {
+      "ok": true,
+      "msg": "QID=Q3866664, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:21:07.436364Z"
+    },
+    "PSX": {
+      "ok": true,
+      "msg": "QID=Q1656230, 0 execs, 12 board, 0 products",
+      "fetchedAt": "2026-10-04T18:21:27.557031Z"
+    },
+    "VLO": {
+      "ok": true,
+      "msg": "QID=Q2516284, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:21:38.003345Z"
+    },
+    "OXY": {
+      "ok": true,
+      "msg": "QID=Q1346110, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:21:47.080323Z"
+    },
+    "NEE": {
+      "ok": true,
+      "msg": "QID=Q967868, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:22:05.219138Z"
+    },
+    "DUK": {
+      "ok": true,
+      "msg": "QID=Q168751, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:22:08.870735Z"
+    },
+    "SO": {
+      "ok": true,
+      "msg": "QID=Q2304693, 0 execs, 0 board, 1 products",
+      "fetchedAt": "2026-10-04T18:22:33.912038Z"
+    },
+    "ABT": {
+      "ok": true,
+      "msg": "QID=Q306764, 2 execs, 14 board, 0 products",
+      "fetchedAt": "2026-10-04T18:22:55.860065Z"
+    },
+    "TMO": {
+      "ok": true,
+      "msg": "QID=Q643674, 0 execs, 11 board, 0 products",
+      "fetchedAt": "2026-10-04T18:23:01.514468Z"
+    },
+    "DHR": {
+      "ok": true,
+      "msg": "QID=Q1159256, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:23:21.196159Z"
+    },
+    "BMY": {
+      "ok": true,
+      "msg": "QID=Q568642, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:23:42.827171Z"
+    },
+    "AMGN": {
+      "ok": true,
+      "msg": "QID=Q470517, 0 execs, 0 board, 1 products",
+      "fetchedAt": "2026-10-04T18:23:48.618195Z"
+    },
+    "GILD": {
+      "ok": true,
+      "msg": "QID=Q663596, 1 execs, 0 board, 31 products",
+      "fetchedAt": "2026-10-04T18:24:13.867630Z"
+    },
+    "MDT": {
+      "ok": true,
+      "msg": "QID=Q642189, 3 execs, 0 board, 1 products",
+      "fetchedAt": "2026-10-04T18:24:22.990205Z"
+    },
+    "ISRG": {
+      "ok": true,
+      "msg": "QID=Q2743863, 0 execs, 0 board, 1 products",
+      "fetchedAt": "2026-10-04T18:24:34.096970Z"
+    },
+    "REGN": {
+      "ok": true,
+      "msg": "QID=Q7308054, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:24:53.843952Z"
+    },
+    "TGT": {
+      "ok": true,
+      "msg": "QID=Q539352, 0 execs, 0 board, 1 products",
+      "fetchedAt": "2026-10-04T18:25:13.804572Z"
+    },
+    "LOW": {
+      "ok": true,
+      "msg": "QID=Q1373493, 1 execs, 12 board, 1 products",
+      "fetchedAt": "2026-10-04T18:25:32.917110Z"
+    },
+    "CVS": {
+      "ok": true,
+      "msg": "QID=Q624375, 3 execs, 17 board, 1 products",
+      "fetchedAt": "2026-10-04T18:25:45.725282Z"
+    },
+    "EL": {
+      "ok": true,
+      "msg": "QID=Q390287, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:26:03.196649Z"
+    },
+    "CL": {
+      "ok": true,
+      "msg": "QID=Q657415, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:26:10.088586Z"
+    },
+    "TJX": {
+      "ok": true,
+      "msg": "QID=Q1285819, 1 execs, 11 board, 0 products",
+      "fetchedAt": "2026-10-04T18:26:14.112049Z"
+    },
+    "ROST": {
+      "ok": true,
+      "msg": "QID=Q159895, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:26:31.791778Z"
+    },
+    "INTU": {
+      "ok": true,
+      "msg": "QID=Q1318848, 0 execs, 0 board, 2 products",
+      "fetchedAt": "2026-10-04T18:26:38.579344Z"
+    },
+    "AMAT": {
+      "ok": true,
+      "msg": "QID=Q621610, 0 execs, 0 board, 1 products",
+      "fetchedAt": "2026-10-04T18:26:58.074181Z"
+    },
+    "NOW": {
+      "ok": true,
+      "msg": "QID=Q7455653, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:27:16.830215Z"
+    },
+    "PYPL": {
+      "ok": true,
+      "msg": "QID=Q135683211, 2 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:27:36.984175Z"
+    },
+    "SHOP": {
+      "ok": true,
+      "msg": "QID=Q7501150, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:27:51.376306Z"
+    },
+    "UBER": {
+      "ok": true,
+      "msg": "QID=Q780442, 1 execs, 13 board, 0 products",
+      "fetchedAt": "2026-10-04T18:28:00.589238Z"
+    },
+    "ABNB": {
+      "ok": true,
+      "msg": "QID=Q8247526, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:28:04.291421Z"
+    },
+    "SPOT": {
+      "ok": true,
+      "msg": "QID=Q60269744, 1 execs, 2 board, 0 products",
+      "fetchedAt": "2026-10-04T18:28:21.754049Z"
+    },
+    "UNP": {
+      "ok": true,
+      "msg": "QID=Q20022058, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:28:26.922063Z"
+    },
+    "CSX": {
+      "ok": true,
+      "msg": "QID=Q856783, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:28:30.810136Z"
+    },
+    "NSC": {
+      "ok": true,
+      "msg": "QID=Q843944, 0 execs, 0 board, 1 products",
+      "fetchedAt": "2026-10-04T18:28:51.054441Z"
+    },
+    "UPS": {
+      "ok": true,
+      "msg": "QID=Q1318737, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:28:56.927132Z"
+    },
+    "FDX": {
+      "ok": true,
+      "msg": "QID=Q782557, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:29:01.962975Z"
+    },
+    "ODFL": {
+      "ok": true,
+      "msg": "QID=Q7083862, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:29:05.564854Z"
+    },
+    "JBHT": {
+      "ok": true,
+      "msg": "QID=Q4041705, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:29:08.822628Z"
+    },
+    "CHRW": {
+      "ok": true,
+      "msg": "QID=Q931200, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:29:19.901835Z"
+    },
+    "EXPD": {
+      "ok": true,
+      "msg": "QID=Q1384324, 0 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:29:23.706276Z"
+    },
+    "WBD": {
+      "ok": true,
+      "msg": "QID=Q107074885, 1 execs, 0 board, 0 products",
+      "fetchedAt": "2026-10-04T18:29:27.813237Z"
+    },
+    "PARA": {
+      "ok": true,
+      "msg": "QID=Q159846, 1 execs, 0 board, 1 products",
+      "fetchedAt": "2026-10-04T18:29:39.185612Z"
+    }
+  }
+}
