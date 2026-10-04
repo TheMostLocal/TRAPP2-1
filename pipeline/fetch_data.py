@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ============================================================
 #  >>> DESTINATION: TRAPP2-1 repo  →  pipeline/fetch_data.py  <<<
-#  GoodGlobeLLC/TRAPP2-1/pipeline/fetch_data.py
+#  TheMostLocal/TRAPP2-1/pipeline/fetch_data.py
 #
 #  Replace the existing pipeline/fetch_data.py in the TRAPP2-1 repo with
 #  THIS file. (One file per repo — do not mix them up; each is labeled.)
