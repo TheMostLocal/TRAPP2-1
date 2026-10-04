@@ -1,0 +1,71 @@
+# ============================================================
+#  >>> DESTINATION: TRAPP2-1 repo  →  .github/workflows/fx-crypto-refresh.yml  <<<
+#  GoodGlobeLLC/TRAPP2-1/.github/workflows/fx-crypto-refresh.yml
+#
+#  Replace the existing fx-crypto-refresh.yml. Only change: the push step now
+#  integrates the remote before pushing (ours wins on data/ conflicts),
+#  fixing the 'fetch first' rejection when it races the nightly.
+# ============================================================
+name: FX + Crypto Refresh (24h markets)
+
+# FX and crypto trade ~24h, so refresh them far more frequently than the
+# nightly equity sheet. Every 15 minutes during the week; you can widen the
+# cron if you want to conserve Actions minutes.
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 minutes (UTC)
+  workflow_dispatch: {}        # allow manual runs
+
+# Avoid overlapping runs if one takes longer than the interval
+concurrency:
+  group: fx-crypto-refresh
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install yfinance
+
+      - name: Fetch FX rates
+        run: python pipeline/fetch_fx.py
+
+      - name: Fetch crypto prices
+        run: python pipeline/fetch_crypto.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/fx/rates.json data/crypto/prices.json
+          if git diff --staged --quiet; then
+            echo "No changes."
+          else
+            git commit -m "FX/crypto refresh $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            # Safe push: integrate remote first (our generated data wins on
+            # conflict), with allow-unrelated for any divergence. Prevents the
+            # "! [rejected] main -> main (fetch first)" failure when this race-
+            # commits against the nightly.
+            for i in 1 2 3 4 5; do
+              if git push origin HEAD:main; then echo "pushed (attempt $i)"; break; fi
+              echo "push $i rejected — integrating remote (ours wins on data/)"
+              git fetch origin main || true
+              git merge -X ours --allow-unrelated-histories --no-edit origin/main 2>/dev/null || true
+              git checkout --ours -- data/fx/rates.json data/crypto/prices.json 2>/dev/null || true
+              git add data/fx/rates.json data/crypto/prices.json 2>/dev/null || true
+              git commit --no-edit 2>/dev/null || true
+              sleep 4
+            done
+          fi

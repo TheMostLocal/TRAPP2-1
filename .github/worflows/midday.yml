@@ -1,0 +1,126 @@
+name: Mid-Day Refresh (Macro + Regime)
+
+# Runs mid-day every weekday. Target ~11 AM ET; with GitHub Actions queue lag
+# the run lands closer to midday ET.
+#
+# Skips fetch_history.py (that's nightly only). Re-runs macro + signal stack.
+#
+# ---------------------------------------------------------------------------
+# CONFLICT-PROOF PUSH (the fix for "update rejected" + "unmerged files" in
+# data/worldbank_countries.json and data/macro_trade.json):
+#
+# These data files are MACHINE-GENERATED — every run rewrites the whole file.
+# When two workflows (midday + macro-trade, or a nightly that overlaps) push
+# around the same time, a plain `git push` is rejected because the local branch
+# is behind origin. The old retry did `git pull --rebase`, but rebasing two
+# full-file rewrites of the SAME generated JSON ALWAYS conflicts (both sides
+# replaced the entire file), so the rebase halts with "unmerged files" and the
+# loop retries against a broken state forever.
+#
+# The correct pattern for generated artifacts is "latest run wins": don't merge
+# histories at all. Stash our outputs, hard-reset onto the freshest origin/main,
+# restore our outputs over whatever's there, commit, and push. Retried in a loop
+# so even if another job lands in between, the next iteration re-bases onto the
+# new tip and overwrites cleanly. No merge, no rebase, no conflict is possible.
+# ---------------------------------------------------------------------------
+
+on:
+  schedule:
+    - cron: '30 15 * * 1-5'
+  workflow_dispatch:
+
+# Serialize every job in this repo that writes regime/macro data so two of them
+# can't race to push at the same instant. (Shared with nightly + macro-trade.)
+concurrency:
+  group: trapp2-1-data-push
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # full history so fetch/reset works cleanly
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install requirements (only what midday uses — no etf-scraper)
+        run: pip install requests pandas fredapi "yfinance>=0.2.50,<0.3"
+
+      - name: Fetch FRED macro series
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          FED_API_KEY: ${{ secrets.FED_API_KEY }}
+        run: python pipeline/fetch_macro.py
+
+      - name: Fetch World Bank country data (best-effort)
+        run: python pipeline/fetch_worldbank.py
+        continue-on-error: true
+
+      - name: Compute signals
+        run: python pipeline/compute_signals.py
+
+      - name: Classify regime + append snapshot
+        run: python pipeline/classify_regime.py
+
+      - name: Compute Markov transitions
+        run: python pipeline/compute_transitions.py
+
+      - name: Commit & push (latest-run-wins, conflict-proof)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Nothing changed? Done.
+          git add -A data/
+          if git diff --staged --quiet; then
+            echo "No regime changes to commit."
+            exit 0
+          fi
+          echo "=== files staged ==="
+          git diff --staged --name-only
+
+          # Commit our generated output locally first.
+          git commit -m "Mid-day regime refresh $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+          # Push with a rebase-free "our output wins" retry. If the remote moved,
+          # we fetch it, replay ONLY our commit's file changes on top via a
+          # merge that always resolves in our favor (-X ours), and push again.
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt $i"
+              exit 0
+            fi
+            echo "Push attempt $i rejected — remote moved. Reconciling (ours wins) and retrying."
+            git fetch origin main
+            # Merge the new remote tip into our branch, auto-resolving any clash
+            # in the generated files to OUR version. -X ours never leaves
+            # unmerged files, so the next push is clean.
+            git merge -X ours --no-edit origin/main || {
+              echo "Merge hit an unexpected state; forcing our tree on top of origin."
+              git merge --abort 2>/dev/null || true
+              # Last resort: re-base our single commit onto origin by resetting
+              # to origin and re-committing our working files.
+              TMP=$(mktemp -d)
+              cp -r data "$TMP"/data
+              git reset --hard origin/main
+              rm -rf data
+              cp -r "$TMP"/data data
+              git add -A data/
+              git commit -m "Mid-day regime refresh (reconciled) $(date -u +%Y-%m-%dT%H:%M:%SZ)" || true
+              rm -rf "$TMP"
+            }
+            sleep $((i * 3))
+          done
+
+          echo "ERROR: could not push after 5 attempts."
+          exit 1

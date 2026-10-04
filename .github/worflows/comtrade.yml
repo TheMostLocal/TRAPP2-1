@@ -1,0 +1,68 @@
+# ============================================================
+#  >>> DESTINATION: GoodGlobeLLC/TRAPP2-1
+#  >>> FILE PATH:   .github/workflows/comtrade.yml
+#
+#  Fetches UN Comtrade product-level bilateral trade flows MONTHLY and writes
+#  data/comtrade_flows.json. Annual trade data only refreshes a few times a
+#  year, so monthly is plenty and keeps the free 500-calls/day quota untouched
+#  (~24 calls per run, one per relationship).
+#
+#  Requires one repo secret:
+#    COMTRADE_API_KEY   (free at https://comtradeplus.un.org → Sign up for API key)
+# ============================================================
+
+name: UN Comtrade Bilateral Flows
+
+on:
+  schedule:
+    # 06:00 UTC on the 3rd of each month — late enough that any newly published
+    # annual figures for the prior year are usually available.
+    - cron: '0 6 3 * *'
+  workflow_dispatch: {}        # manual "Run workflow" button
+
+permissions:
+  contents: write
+
+concurrency:
+  group: comtrade
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch Comtrade flows
+        env:
+          COMTRADE_API_KEY: ${{ secrets.COMTRADE_API_KEY }}
+        run: python pipeline/fetch_comtrade.py
+
+      - name: Commit & push (comtrade scope only)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/comtrade_flows.json
+          if git diff --staged --quiet; then
+            echo "No comtrade changes to commit"
+            exit 0
+          fi
+          git commit -m "Comtrade bilateral flows $(date -u +%Y-%m-%dT%H:%M:%SZ) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then echo "Pushed on attempt $i"; break; fi
+            git fetch origin
+            git merge -X ours origin/${{ github.ref_name }} 2>/dev/null || true
+            if [ -f .git/MERGE_HEAD ]; then
+              git checkout --ours -- data/comtrade_flows.json 2>/dev/null || true
+              git add -A data/comtrade_flows.json 2>/dev/null || true
+              git commit --no-edit 2>/dev/null || true
+            fi
+            sleep 4
+          done

@@ -1,0 +1,65 @@
+# ============================================================
+#  >>> DESTINATION: GoodGlobeLLC/TRAPP2-1
+#  >>> FILE PATH:   .github/workflows/macro-quad.yml
+#
+#  Computes the REAL growth/inflation quad from FRED (Real GDP YoY + CPI YoY,
+#  rate-of-change) and writes data/macro/quad.json, which the bot runner reads
+#  for true macro parity (instead of its market-implied proxy). GDP is quarterly
+#  and CPI monthly, so MONTHLY cadence keeps the quad current.
+#
+#  Requires the FRED key you already use:  secret FED_API_KEY
+# ============================================================
+
+name: Macro Quad (FRED)
+
+on:
+  schedule:
+    - cron: '0 7 5 * *'        # 07:00 UTC on the 5th — after monthly CPI prints
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: macro-quad
+  cancel-in-progress: false
+
+jobs:
+  quad:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compute macro quad
+        env:
+          FED_API_KEY: ${{ secrets.FED_API_KEY }}
+        run: python pipeline/fetch_macro_quad.py
+
+      - name: Commit & push (macro scope only)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/macro/quad.json
+          if git diff --staged --quiet; then
+            echo "No quad change to commit"
+            exit 0
+          fi
+          git commit -m "Macro quad $(date -u +%Y-%m-%dT%H:%M:%SZ) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then echo "Pushed on attempt $i"; break; fi
+            git fetch origin
+            git merge -X ours origin/${{ github.ref_name }} 2>/dev/null || true
+            if [ -f .git/MERGE_HEAD ]; then
+              git checkout --ours -- data/macro/quad.json 2>/dev/null || true
+              git add -A data/macro/quad.json 2>/dev/null || true
+              git commit --no-edit 2>/dev/null || true
+            fi
+            sleep 4
+          done

@@ -1,0 +1,91 @@
+# ============================================================
+#  >>> DESTINATION: GoodGlobeLLC/TRAPP2-1
+#  >>> FILE PATH:   .github/workflows/intraday.yml
+#  >>> FULL PATH:   GoodGlobeLLC/TRAPP2-1/.github/workflows/intraday.yml
+#
+#  Edit/paste directly on GitHub here:
+#  https://github.com/GoodGlobeLLC/TRAPP2-1/edit/main/.github/workflows/intraday.yml
+#
+#  WHAT CHANGED IN THIS FILE:
+#    Push logic changed from `git pull --rebase` (which crashed with
+#    'unmerged files' on regenerated JSON) to `git fetch` + `git merge -X
+#    ours` (latest run wins, never conflicts).
+# ============================================================
+
+name: Live Quotes (Intraday)
+
+# Strategy: GitHub Actions schedules are queued, not fired-at-time. Observed
+# queue lag for this repo has been 3-6 hours on the first trigger of the day.
+# To compensate, we start the schedule 3 hours earlier than the user's target
+# window. Even if every trigger lags 3 hours, we'll have quotes flowing by
+# the 9:30 AM ET open.
+#
+# UTC mapping:
+#   EDT 9:30 AM = 13:30 UTC, EST 9:30 AM = 14:30 UTC
+#   EDT 4:00 PM = 20:00 UTC, EST 4:00 PM = 21:00 UTC
+#
+# We schedule from 07:00 UTC through 21:00 UTC, covering both DST regimes
+# with 3 hours of pre-market warm-up to absorb queue latency.
+#
+# CADENCE: Every 20 minutes during market hours = 14 runs per trading day
+# inside the active US session, plus pre-market warmups.
+
+on:
+  schedule:
+    # Pre-market warmup: 07:00-13:00 UTC = 3 AM-9 AM ET (EDT) / 2 AM-8 AM ET (EST)
+    # These early runs absorb GitHub Actions queue lag so first real market
+    # refresh lands at or near the 9:30 ET bell.
+    - cron: '0,20,40 7-12 * * 1-5'
+    # Active session: 13:00-21:00 UTC = 9 AM-5 PM ET (EDT)
+    - cron: '0,20,40 13-21 * * 1-5'
+  workflow_dispatch:
+
+concurrency:
+  group: trapp2-1-quotes
+  cancel-in-progress: false   # don't kill a run mid-fetch
+
+jobs:
+  quotes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Fetch live quotes (master.csv + master.json)
+        run: python pipeline/fetch_data.py
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/
+          if git diff --staged --quiet; then
+            echo "No quote changes to commit"
+          else
+            git commit -m "Live quotes $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            # Conflict-proof push: quotes are machine-generated (whole files
+            # rewritten each run). If another workflow in this repo pushed first,
+            # a plain push is rejected; the OLD retry used `git pull --rebase`,
+            # which conflicts on two full-file rewrites of the same data file and
+            # can leave unmerged files. Instead: fetch + `merge -X ours`, which
+            # auto-resolves to THIS run's quotes and never leaves a conflict.
+            for i in 1 2 3 4 5; do
+              if git push origin HEAD:main; then echo "Pushed on attempt $i"; break; fi
+              echo "Push rejected — reconciling (ours wins) and retrying."
+              git fetch origin main
+              git merge -X ours --no-edit origin/main || git merge --abort 2>/dev/null || true
+              sleep $((i * 2))
+            done
+          fi

@@ -1,0 +1,100 @@
+name: Macro Trade + World Bank Refresh
+
+# US trade balance (FRED) prints monthly with a ~45-day lag; World Bank GDP is
+# annual but cheap to re-pull. Running on the 3rd of each month catches the
+# monthly trade print and keeps the World Bank file current.
+#
+# ---------------------------------------------------------------------------
+# CONFLICT-PROOF PUSH — same fix as midday.yml. data/macro_trade.json and
+# data/worldbank_countries.json are machine-generated (whole file rewritten each
+# run). A plain push that's behind origin gets rejected, and `git pull --rebase`
+# on two full-file rewrites of the SAME file ALWAYS conflicts -> "unmerged
+# files" -> the retry loop is stuck. Fix: don't merge histories; let the latest
+# run win via `git merge -X ours`, which never leaves unmerged files. Also share
+# a concurrency group with the other data-writing workflows so they can't race.
+# ---------------------------------------------------------------------------
+
+on:
+  schedule:
+    - cron: "0 10 3 * *"   # 10:00 UTC on the 3rd of each month
+  workflow_dispatch: {}
+
+# Serialize against midday + nightly so two data-writing jobs never push at once.
+concurrency:
+  group: trapp2-1-data-push
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+
+      - name: Install requirements
+        run: pip install requests pandas fredapi
+
+      - name: Fetch FRED US trade balance (writes data/macro_trade.json)
+        env:
+          FED_API_KEY: ${{ secrets.FED_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python pipeline/fetch_macro.py
+
+      - name: Fetch World Bank country data
+        run: python pipeline/fetch_worldbank.py
+        continue-on-error: true
+
+      - name: Commit & push (latest-run-wins, conflict-proof)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Stage only the files this job produces (worldbank may be skipped).
+          git add data/macro_trade.json 2>/dev/null || true
+          [ -f data/worldbank_countries.json ] && git add data/worldbank_countries.json || true
+
+          if git diff --staged --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          echo "=== files staged ==="
+          git diff --staged --name-only
+
+          git commit -m "Macro trade + World Bank refresh $(date -u +%Y-%m-%d)"
+
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              echo "Pushed on attempt $i"
+              exit 0
+            fi
+            echo "Push attempt $i rejected — remote moved. Reconciling (ours wins) and retrying."
+            git fetch origin main
+            git merge -X ours --no-edit origin/main || {
+              echo "Merge hit an unexpected state; forcing our tree on top of origin."
+              git merge --abort 2>/dev/null || true
+              TMP=$(mktemp -d)
+              cp -r data "$TMP"/data
+              git reset --hard origin/main
+              rm -rf data
+              cp -r "$TMP"/data data
+              git add -A data/
+              git commit -m "Macro trade + World Bank refresh (reconciled) $(date -u +%Y-%m-%d)" || true
+              rm -rf "$TMP"
+            }
+            sleep $((i * 3))
+          done
+
+          echo "ERROR: could not push after 5 attempts."
+          exit 1
