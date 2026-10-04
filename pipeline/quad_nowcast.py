@@ -28,8 +28,10 @@ def _load(series):
     obs = d.get("observations") if isinstance(d, dict) else d
     out = []
     for o in (obs or []):
-        try: out.append((o.get("date"), float(o.get("value"))))
+        try: v = float(o.get("value"))
         except (TypeError, ValueError): continue
+        if math.isfinite(v):
+            out.append((o.get("date"), v))
     return out
 
 def _zchange(series, n, lookback=260):
@@ -86,7 +88,28 @@ def nowcast():
         "asOfInputs": {k: (v[-1][0] if v else None) for k, v in S.items()},
     }
 
+SERIES = ["DCOILWTICO", "BAMLH0A0HYM2", "T10Y2Y", "VIXCLS", "DGS10", "DGS2", "DEXUSEU"]
+MIN_OBS = 70          # >= 63-day window + a few points of slack
+MIN_SERIES = 5        # of the 7 inputs
+
+
+def inputs_ok():
+    """Refuse to nowcast on missing inputs. With no FRED series on disk every
+    signal is 0, which the quad logic reads as growth-up/inflation-up and would
+    publish a confident-looking 'Q2 Reflation' that is pure artifact."""
+    have = {k: len(_load(k)) for k in SERIES}
+    usable = [k for k, n in have.items() if n >= MIN_OBS]
+    if len(usable) < MIN_SERIES or "DCOILWTICO" not in usable:
+        print(f"::warning::quad nowcast SKIPPED — only {len(usable)}/{len(SERIES)} FRED series usable "
+              f"({', '.join(f'{k}={n}' for k, n in have.items())}). "
+              "Run the Mid-Day Refresh (fetch_macro.py) to restore data/macro/*.json; quad.json left unchanged.")
+        return False
+    return True
+
+
 def main():
+    if not inputs_ok():
+        return 0
     nc = nowcast()
     doc = {}
     if os.path.exists(QUAD):
