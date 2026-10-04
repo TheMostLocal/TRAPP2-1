@@ -1,0 +1,68 @@
+# ============================================================
+#  >>> DESTINATION: TRAPP2-1 repo  →  .github/workflows/13f-refresh.yml  <<<
+#  GoodGlobeLLC/TRAPP2-1/.github/workflows/13f-refresh.yml
+#
+#  Replace the existing 13f-refresh.yml. Only change: the push step now
+#  integrates the remote before pushing (ours wins on data/ conflicts),
+#  fixing the 'fetch first' rejection when it races the nightly.
+# ============================================================
+name: 13F Quarterly Refresh
+
+# 13F filings post up to 45 days after quarter-end. Running on the 5th of
+# Feb / May / Aug / Nov catches each quarter's filings shortly after the
+# deadline. Also runnable manually.
+on:
+  schedule:
+    - cron: "0 9 5 2,5,8,11 *"   # 09:00 UTC on the 5th of Feb/May/Aug/Nov
+  workflow_dispatch: {}
+
+concurrency:
+  group: 13f-refresh
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch 13F holdings
+        run: python pipeline/fetch_13f.py
+
+      - name: Fetch company SEC filings (10-K/10-Q/8-K)
+        run: python pipeline/fetch_sec_filings.py
+        continue-on-error: true
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/13f/ data/sec_filings.json
+          if git diff --staged --quiet; then
+            echo "No 13F/filings changes."
+          else
+            git commit -m "13F + SEC filings refresh $(date -u +%Y-%m-%d)"
+            # Safe push: integrate remote first (our generated data wins on
+            # conflict), with allow-unrelated for any divergence. Prevents the
+            # "! [rejected] main -> main (fetch first)" failure when this race-
+            # commits against the nightly.
+            for i in 1 2 3 4 5; do
+              if git push origin HEAD:main; then echo "pushed (attempt $i)"; break; fi
+              echo "push $i rejected — integrating remote (ours wins on data/)"
+              git fetch origin main || true
+              git merge -X ours --allow-unrelated-histories --no-edit origin/main 2>/dev/null || true
+              git checkout --ours -- data/13f/ data/sec_filings.json 2>/dev/null || true
+              git add data/13f/ data/sec_filings.json 2>/dev/null || true
+              git commit --no-edit 2>/dev/null || true
+              sleep 4
+            done
+          fi
