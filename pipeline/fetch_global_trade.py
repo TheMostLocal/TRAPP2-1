@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ============================================================
 #  >>> DESTINATION: TRAPP2-1 repo  →  pipeline/fetch_global_trade.py  <<<
-#  GoodGlobeLLC/TRAPP2-1/pipeline/fetch_global_trade.py
+#  TheMostLocal/TRAPP2-1/pipeline/fetch_global_trade.py
 #
 #  NEW FILE. Add it to TRAPP2-1, then add a step to that repo's nightly
 #  workflow to run it (it writes data/global_trade.json which the app reads):
