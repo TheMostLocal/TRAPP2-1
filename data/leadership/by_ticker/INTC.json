@@ -1,6 +1,6 @@
 {
   "ticker": "INTC",
-  "fetchedAt": "2026-10-05T11:37:58.345282Z",
+  "fetchedAt": "2026-10-05T14:46:43.132454Z",
   "people": [
     {
       "qid": "Q12572999",
@@ -14,9 +14,9 @@
         "birthPlace": "Santa Clara County",
         "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Brian%20Krzanich%2C%20Intel%20Chief%20Executive%20Officer.jpg",
         "occupations": [
+          "engineer",
           "entrepreneur",
           "chemist",
-          "engineer",
           "businessperson"
         ],
         "education": [
@@ -127,10 +127,10 @@
         "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Rajiv%20L%20Gupta%20George%20Barclay%20Gordon%20Moore%20ID2004%20%28cropped%2C%20Moore%29.JPG",
         "occupations": [
           "philanthropist",
-          "chemist",
           "physicist",
-          "entrepreneur",
-          "engineer"
+          "chemist",
+          "engineer",
+          "entrepreneur"
         ],
         "education": [
           "University of California, Berkeley",
@@ -160,9 +160,9 @@
         "birthPlace": "Burlington",
         "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Robert%20Noyce%20with%20Motherboard%201959.png",
         "occupations": [
-          "inventor",
-          "businessperson",
           "computer scientist",
+          "businessperson",
+          "inventor",
           "physicist"
         ],
         "education": [
@@ -415,18 +415,23 @@
         "birthPlace": "Seattle",
         "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Risa%20Lavizzo-Mourey%20at%20the%20World%20Economic%20Forum.jpg",
         "occupations": [
-          "physician",
-          "administrator"
+          "administrator",
+          "physician"
         ],
         "education": [
+          "The Bush School",
           "The Wharton School",
-          "Harvard Medical School",
-          "University of Pennsylvania",
-          "Harvard University",
           "Stony Brook University",
-          "The Bush School"
+          "Harvard University",
+          "Harvard Medical School",
+          "University of Pennsylvania"
         ],
         "employers": [
+          {
+            "company": "Robert Wood Johnson Foundation",
+            "start": "2001-04-01",
+            "end": null
+          },
           {
             "company": "United States Department of Health and Human Services",
             "start": null,
@@ -436,14 +441,15 @@
             "company": "Perelman School of Medicine at the University of Pennsylvania",
             "start": null,
             "end": null
-          },
-          {
-            "company": "Robert Wood Johnson Foundation",
-            "start": "2001-04-01",
-            "end": null
           }
         ],
         "positions": [
+          {
+            "title": "chief executive officer",
+            "company": null,
+            "start": "2003-01-01",
+            "end": "2017-04-01"
+          },
           {
             "title": "board of directors member",
             "company": null,
@@ -455,12 +461,6 @@
             "company": null,
             "start": "2014-02-21",
             "end": "2026-03-02"
-          },
-          {
-            "title": "chief executive officer",
-            "company": null,
-            "start": "2003-01-01",
-            "end": "2017-04-01"
           }
         ]
       }
@@ -535,8 +535,8 @@
         "birthPlace": null,
         "image": null,
         "occupations": [
-          "board member",
-          "businessperson"
+          "businessperson",
+          "board member"
         ],
         "education": [
           "University of California, Berkeley"
@@ -599,8 +599,8 @@
         "birthPlace": null,
         "image": null,
         "occupations": [
-          "businessperson",
           "board member",
+          "businessperson",
           "chief financial officer"
         ],
         "education": [],
@@ -709,10 +709,10 @@
         "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Rajiv%20L%20Gupta%20George%20Barclay%20Gordon%20Moore%20ID2004%20%28cropped%2C%20Moore%29.JPG",
         "occupations": [
           "philanthropist",
-          "chemist",
           "physicist",
-          "entrepreneur",
-          "engineer"
+          "chemist",
+          "engineer",
+          "entrepreneur"
         ],
         "education": [
           "University of California, Berkeley",
@@ -742,9 +742,9 @@
         "birthPlace": "Burlington",
         "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Robert%20Noyce%20with%20Motherboard%201959.png",
         "occupations": [
-          "inventor",
-          "businessperson",
           "computer scientist",
+          "businessperson",
+          "inventor",
           "physicist"
         ],
         "education": [
