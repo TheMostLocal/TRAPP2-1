@@ -1,1 +1,241 @@
-{"_schema":"valuatio-macro-quad/v1","_description":"Hedgeye-style growth/inflation quad from FRED GDPC1 + CPIAUCSL. quad: 1=Goldilocks 2=Reflation 3=Stagflation 4=Deflation.","generated_at":"2026-10-05T15:49:12+00:00","source":"FRED (GDPC1, CPIAUCSL)","current":{"quad":4,"label":"Deflation (growth\u2193 inflation\u2193)","asOf":"2026-08-01","growthYoY":0.021916,"inflationYoY":0.03713,"growthRoC":-0.004476,"inflationRoC":-0.005571,"growthDir":"decelerating","inflationDir":"decelerating","favors":["XLP","XLV","XLU"],"hurts":["XLK","XLB","XLE"]},"history":[{"date":"2025-02-01","growthYoY":0.023111,"inflationYoY":0.028016,"growthRoC":-0.003308,"inflationRoC":0.000821,"quad":3},{"date":"2025-03-01","growthYoY":0.023111,"inflationYoY":0.02382,"growthRoC":-0.003308,"inflationRoC":-0.004887,"quad":4},{"date":"2025-04-01","growthYoY":0.024206,"inflationYoY":0.023254,"growthRoC":0.001095,"inflationRoC":-0.006656,"quad":1},{"date":"2025-05-01","growthYoY":0.024206,"inflationYoY":0.023773,"growthRoC":0.001095,"inflationRoC":-0.004243,"quad":1},{"date":"2025-06-01","growthYoY":0.024206,"inflationYoY":0.026805,"growthRoC":0.001095,"inflationRoC":0.002985,"quad":2},{"date":"2025-07-01","growthYoY":0.026007,"inflationYoY":0.027426,"growthRoC":0.001801,"inflationRoC":0.004172,"quad":2},{"date":"2025-08-01","growthYoY":0.026007,"inflationYoY":0.029386,"growthRoC":0.001801,"inflationRoC":0.005613,"quad":2},{"date":"2025-09-01","growthYoY":0.026007,"inflationYoY":0.030226,"growthRoC":0.001801,"inflationRoC":0.003421,"quad":2},{"date":"2025-11-01","growthYoY":0.02046,"inflationYoY":0.029883,"growthRoC":-0.005546,"inflationRoC":0.002457,"quad":3},{"date":"2025-12-01","growthYoY":0.02046,"inflationYoY":0.030023,"growthRoC":-0.005546,"inflationRoC":0.000637,"quad":3},{"date":"2026-01-01","growthYoY":0.026392,"inflationYoY":0.028287,"growthRoC":0.005931,"inflationRoC":-0.001939,"quad":1},{"date":"2026-02-01","growthYoY":0.026392,"inflationYoY":0.026646,"growthRoC":0.005931,"inflationRoC":-0.003237,"quad":1},{"date":"2026-03-01","growthYoY":0.026392,"inflationYoY":0.033202,"growthRoC":0.005931,"inflationRoC":0.003179,"quad":2},{"date":"2026-04-01","growthYoY":0.021916,"inflationYoY":0.03947,"growthRoC":-0.004476,"inflationRoC":0.011183,"quad":3},{"date":"2026-05-01","growthYoY":0.021916,"inflationYoY":0.0427,"growthRoC":-0.004476,"inflationRoC":0.016054,"quad":3},{"date":"2026-06-01","growthYoY":0.021916,"inflationYoY":0.037265,"growthRoC":-0.004476,"inflationRoC":0.004063,"quad":3},{"date":"2026-07-01","growthYoY":0.021916,"inflationYoY":0.035398,"growthRoC":-0.004476,"inflationRoC":-0.004073,"quad":4},{"date":"2026-08-01","growthYoY":0.021916,"inflationYoY":0.03713,"growthRoC":-0.004476,"inflationRoC":-0.005571,"quad":4}]}
+{
+ "_schema": "valuatio-macro-quad/v1",
+ "_description": "Hedgeye-style growth/inflation quad from FRED GDPC1 + CPIAUCSL. quad: 1=Goldilocks 2=Reflation 3=Stagflation 4=Deflation.",
+ "generated_at": "2026-10-05T15:49:12+00:00",
+ "source": "FRED (GDPC1, CPIAUCSL)",
+ "current": {
+  "quad": 2,
+  "label": "Reflation (growth\u2191 inflation\u2191)",
+  "asOf": "2026-10-06",
+  "method": "market-nowcast",
+  "source": "daily market ROC (oil, HY OAS, 2s10s, VIX, UST, USD)",
+  "growthScore": 0.0129,
+  "inflationScore": 0.3586,
+  "growthDir": "flat",
+  "inflationDir": "accelerating",
+  "confidence": 0.743,
+  "favors": [
+   "XLE",
+   "XLF",
+   "XLI",
+   "XLB"
+  ],
+  "hurts": [
+   "XLU",
+   "XLP"
+  ],
+  "drivers": [
+   {
+    "signal": "DGS10",
+    "value": 0.948
+   },
+   {
+    "signal": "BAMLH0A0HYM2",
+    "value": 0.878
+   },
+   {
+    "signal": "DGS2",
+    "value": 0.853
+   },
+   {
+    "signal": "DEXUSEU",
+    "value": -0.744
+   },
+   {
+    "signal": "T10Y2Y",
+    "value": 0.515
+   },
+   {
+    "signal": "DCOILWTICO",
+    "value": 0.486
+   },
+   {
+    "signal": "VIXCLS",
+    "value": 0.053
+   }
+  ],
+  "asOfInputs": {
+   "DCOILWTICO": "2026-09-29",
+   "BAMLH0A0HYM2": "2026-10-02",
+   "T10Y2Y": "2026-10-05",
+   "VIXCLS": "2026-10-02",
+   "DGS10": "2026-10-02",
+   "DGS2": "2026-10-02",
+   "DEXUSEU": "2026-10-02"
+  },
+  "growthYoY": 0.021916,
+  "inflationYoY": 0.03713,
+  "growthRoC": -0.004476,
+  "inflationRoC": -0.005571,
+  "officialAsOf": "2026-08-01"
+ },
+ "history": [
+  {
+   "date": "2025-02-01",
+   "growthYoY": 0.023111,
+   "inflationYoY": 0.028016,
+   "growthRoC": -0.003308,
+   "inflationRoC": 0.000821,
+   "quad": 3
+  },
+  {
+   "date": "2025-03-01",
+   "growthYoY": 0.023111,
+   "inflationYoY": 0.02382,
+   "growthRoC": -0.003308,
+   "inflationRoC": -0.004887,
+   "quad": 4
+  },
+  {
+   "date": "2025-04-01",
+   "growthYoY": 0.024206,
+   "inflationYoY": 0.023254,
+   "growthRoC": 0.001095,
+   "inflationRoC": -0.006656,
+   "quad": 1
+  },
+  {
+   "date": "2025-05-01",
+   "growthYoY": 0.024206,
+   "inflationYoY": 0.023773,
+   "growthRoC": 0.001095,
+   "inflationRoC": -0.004243,
+   "quad": 1
+  },
+  {
+   "date": "2025-06-01",
+   "growthYoY": 0.024206,
+   "inflationYoY": 0.026805,
+   "growthRoC": 0.001095,
+   "inflationRoC": 0.002985,
+   "quad": 2
+  },
+  {
+   "date": "2025-07-01",
+   "growthYoY": 0.026007,
+   "inflationYoY": 0.027426,
+   "growthRoC": 0.001801,
+   "inflationRoC": 0.004172,
+   "quad": 2
+  },
+  {
+   "date": "2025-08-01",
+   "growthYoY": 0.026007,
+   "inflationYoY": 0.029386,
+   "growthRoC": 0.001801,
+   "inflationRoC": 0.005613,
+   "quad": 2
+  },
+  {
+   "date": "2025-09-01",
+   "growthYoY": 0.026007,
+   "inflationYoY": 0.030226,
+   "growthRoC": 0.001801,
+   "inflationRoC": 0.003421,
+   "quad": 2
+  },
+  {
+   "date": "2025-11-01",
+   "growthYoY": 0.02046,
+   "inflationYoY": 0.029883,
+   "growthRoC": -0.005546,
+   "inflationRoC": 0.002457,
+   "quad": 3
+  },
+  {
+   "date": "2025-12-01",
+   "growthYoY": 0.02046,
+   "inflationYoY": 0.030023,
+   "growthRoC": -0.005546,
+   "inflationRoC": 0.000637,
+   "quad": 3
+  },
+  {
+   "date": "2026-01-01",
+   "growthYoY": 0.026392,
+   "inflationYoY": 0.028287,
+   "growthRoC": 0.005931,
+   "inflationRoC": -0.001939,
+   "quad": 1
+  },
+  {
+   "date": "2026-02-01",
+   "growthYoY": 0.026392,
+   "inflationYoY": 0.026646,
+   "growthRoC": 0.005931,
+   "inflationRoC": -0.003237,
+   "quad": 1
+  },
+  {
+   "date": "2026-03-01",
+   "growthYoY": 0.026392,
+   "inflationYoY": 0.033202,
+   "growthRoC": 0.005931,
+   "inflationRoC": 0.003179,
+   "quad": 2
+  },
+  {
+   "date": "2026-04-01",
+   "growthYoY": 0.021916,
+   "inflationYoY": 0.03947,
+   "growthRoC": -0.004476,
+   "inflationRoC": 0.011183,
+   "quad": 3
+  },
+  {
+   "date": "2026-05-01",
+   "growthYoY": 0.021916,
+   "inflationYoY": 0.0427,
+   "growthRoC": -0.004476,
+   "inflationRoC": 0.016054,
+   "quad": 3
+  },
+  {
+   "date": "2026-06-01",
+   "growthYoY": 0.021916,
+   "inflationYoY": 0.037265,
+   "growthRoC": -0.004476,
+   "inflationRoC": 0.004063,
+   "quad": 3
+  },
+  {
+   "date": "2026-07-01",
+   "growthYoY": 0.021916,
+   "inflationYoY": 0.035398,
+   "growthRoC": -0.004476,
+   "inflationRoC": -0.004073,
+   "quad": 4
+  },
+  {
+   "date": "2026-08-01",
+   "growthYoY": 0.021916,
+   "inflationYoY": 0.03713,
+   "growthRoC": -0.004476,
+   "inflationRoC": -0.005571,
+   "quad": 4
+  }
+ ],
+ "officialLatest": {
+  "quad": 4,
+  "label": "Deflation (growth\u2193 inflation\u2193)",
+  "asOf": "2026-08-01",
+  "growthYoY": 0.021916,
+  "inflationYoY": 0.03713,
+  "growthRoC": -0.004476,
+  "inflationRoC": -0.005571,
+  "growthDir": "decelerating",
+  "inflationDir": "decelerating",
+  "favors": [
+   "XLP",
+   "XLV",
+   "XLU"
+  ],
+  "hurts": [
+   "XLK",
+   "XLB",
+   "XLE"
+  ]
+ },
+ "_nowcast_note": "current = fresh market nowcast (quad_nowcast.py); history = FRED GDP/CPI monthly; officialLatest = last GDP/CPI print.",
+ "nowcast_generated_at": "2026-10-06T02:26:44.341089+00:00"
+}
