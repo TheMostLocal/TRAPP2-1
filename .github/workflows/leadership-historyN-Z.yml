@@ -82,8 +82,24 @@ jobs:
           # Create commit
           git commit -m "Leadership history refresh N-Z $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-          # Fetch latest remote state
-          git fetch origin main
+          # Park anything not staged so a retry merge is never blocked.
+          git stash push --include-untracked -q -m leftovers 2>/dev/null || true
 
-          # Push generated artifacts safely without rebasing
-          git push --force-with-lease origin HEAD:main
+          # NEVER force-push. This job runs for minutes while fx-crypto (every
+          # 15 min), intraday, midday and nightly push to main; the old
+          # `fetch` + `push --force-with-lease` always matched the freshly
+          # fetched lease, so it silently DELETED their commits. Merge instead -
+          # ours wins only for OUR folder.
+          OWN="data/leadership/"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then echo "Pushed on attempt $i"; break; fi
+            echo "Push rejected - merging remote (ours wins for $OWN) and retrying"
+            git fetch origin main
+            git merge -X ours origin/main --no-edit 2>/dev/null || true
+            if [ -f .git/MERGE_HEAD ]; then
+              git checkout --ours -- $OWN 2>/dev/null || true
+              git add -A $OWN 2>/dev/null || true
+              git commit --no-edit 2>/dev/null || true
+            fi
+            sleep $((i * 2))
+          done
