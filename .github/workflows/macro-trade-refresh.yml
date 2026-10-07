@@ -50,51 +50,43 @@ jobs:
         env:
           FED_API_KEY: ${{ secrets.FED_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-        run: python pipeline/fetch_macro.py
+        # Was `fetch_macro.py` (the FRED macro series, which Mid-Day owns), so
+        # macro_trade.json had been frozen since 2026-06-18.
+        run: python pipeline/fetch_macro_trade.py
+        continue-on-error: true
+
+      - name: Fetch fresh global-trade GDP (IMF WEO + World Bank, keyless)
+        # Writes data/global_trade.json for the Global Trade tab; was never wired
+        # into a workflow (frozen since 2026-06-21).
+        run: python pipeline/fetch_global_trade.py
+        continue-on-error: true
 
       - name: Fetch World Bank country data
         run: python pipeline/fetch_worldbank.py
         continue-on-error: true
 
-      - name: Commit & push (latest-run-wins, conflict-proof)
+      - name: Commit & push (trade scope only)
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Stage only the files this job produces (worldbank may be skipped).
-          git add data/macro_trade.json 2>/dev/null || true
-          [ -f data/worldbank_countries.json ] && git add data/worldbank_countries.json || true
-
-          if git diff --staged --quiet; then
-            echo "No changes."
-            exit 0
-          fi
-          echo "=== files staged ==="
-          git diff --staged --name-only
-
-          git commit -m "Macro trade + World Bank refresh $(date -u +%Y-%m-%d)"
-
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # SCOPED to this job's outputs. The old step staged ALL of data/ and, if
+          # a merge failed, copied this run's whole data/ tree over origin -
+          # reverting every other workflow's files (tape, fx, leadership, ...).
+          OWN="data/macro_trade.json data/global_trade.json data/worldbank_countries.json"
+          for p in $OWN; do git add -A "$p" 2>/dev/null || true; done
+          if git diff --staged --quiet; then echo "No changes."; exit 0; fi
+          echo "=== files staged ==="; git diff --staged --name-only
+          git commit -m "Macro trade + global trade + World Bank refresh $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git stash push --include-untracked -q -m leftovers 2>/dev/null || true
           for i in 1 2 3 4 5; do
-            if git push origin HEAD:main; then
-              echo "Pushed on attempt $i"
-              exit 0
-            fi
-            echo "Push attempt $i rejected — remote moved. Reconciling (ours wins) and retrying."
+            if git push origin HEAD:main; then echo "Pushed on attempt $i"; exit 0; fi
+            echo "Push rejected - merging remote (ours wins for OUR files) and retrying"
             git fetch origin main
-            git merge -X ours --no-edit origin/main || {
-              echo "Merge hit an unexpected state; forcing our tree on top of origin."
-              git merge --abort 2>/dev/null || true
-              TMP=$(mktemp -d)
-              cp -r data "$TMP"/data
-              git reset --hard origin/main
-              rm -rf data
-              cp -r "$TMP"/data data
-              git add -A data/
-              git commit -m "Macro trade + World Bank refresh (reconciled) $(date -u +%Y-%m-%d)" || true
-              rm -rf "$TMP"
-            }
+            git merge -X ours origin/main --no-edit 2>/dev/null || true
+            if [ -f .git/MERGE_HEAD ]; then
+              for p in $OWN; do git checkout --ours -- "$p" 2>/dev/null || true; git add -A "$p" 2>/dev/null || true; done
+              git commit --no-edit 2>/dev/null || true
+            fi
             sleep $((i * 3))
           done
-
-          echo "ERROR: could not push after 5 attempts."
-          exit 1
+          echo "ERROR: could not push after 5 attempts."; exit 1
