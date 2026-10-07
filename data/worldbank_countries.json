@@ -1,7 +1,7 @@
 {
   "_schema": "valuatio-worldbank-v1",
   "_description": "Annual GDP + trade composition from the World Bank (free API, no key). Data is typically 6-18 months lagged.",
-  "updatedAt": "2026-10-06T20:29:38.631711Z",
+  "updatedAt": "2026-10-07T05:14:08.064835Z",
   "source": "World Bank (api.worldbank.org)",
   "countries": {
     "USA": {
@@ -269,8 +269,6 @@
       "name": "Switzerland",
       "etf": "EWL",
       "iso3": "CHE",
-      "gdpUsd": 1043529899250.92,
-      "gdpUsdYear": "2025",
       "exportsPctGdp": 78.0527434720482,
       "exportsPctGdpYear": "2025",
       "importsPctGdp": 69.109307845911,
@@ -278,8 +276,7 @@
       "tradePctGdp": 147.162051317959,
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 1.30007790958307,
-      "gdpGrowthPctYear": "2025",
-      "gdpRank": 17
+      "gdpGrowthPctYear": "2025"
     }
   }
 }
