@@ -49,6 +49,23 @@ SERIES = [
     ("VIXCLS",       "VIX",                       "daily"),
     ("DCOILWTICO",   "WTI Crude",                 "daily"),
     ("DEXUSEU",      "USD/EUR",                   "daily"),
+    # ---- Inflation & macro conditions (z82) — the free, primary-source version
+    # of a Trading Economics inflation page (BLS / BEA / Fed data via FRED). A
+    # wrong or retired id just logs a miss; the rest still land.
+    ("CPILFESL",     "Core CPI (ex food & energy)",          "monthly"),
+    ("PCEPILFE",     "Core PCE Price Index (Fed target)",    "monthly"),
+    ("PPIFIS",       "PPI Final Demand",                     "monthly"),
+    ("MEDCPIM158SFRBCLE", "Median CPI (Cleveland Fed)",      "monthly"),
+    ("CORESTICKM159SFRBATL", "Sticky Core CPI (Atlanta Fed)", "monthly"),
+    ("T5YIE",        "5-Year Breakeven Inflation",           "daily"),
+    ("T10YIE",       "10-Year Breakeven Inflation",          "daily"),
+    ("T5YIFR",       "5y5y Forward Inflation Expectation",   "daily"),
+    ("MICH",         "UMich 1-Year Inflation Expectations",  "monthly"),
+    ("EXPINF1YR",    "Cleveland Fed 1-Year Expected Inflation", "monthly"),
+    ("UMCSENT",      "UMich Consumer Sentiment",             "monthly"),
+    ("GDPC1",        "Real GDP (chained 2017 $)",            "quarterly"),
+    ("RSAFS",        "Retail Sales",                         "monthly"),
+    ("ICSA",         "Initial Jobless Claims",               "weekly"),
 ]
 
 
