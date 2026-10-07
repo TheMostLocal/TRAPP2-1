@@ -6,14 +6,14 @@
  "current": {
   "quad": 2,
   "label": "Reflation (growth\u2191 inflation\u2191)",
-  "asOf": "2026-10-06",
+  "asOf": "2026-10-07",
   "method": "market-nowcast",
   "source": "daily market ROC (oil, HY OAS, 2s10s, VIX, UST, USD)",
-  "growthScore": 0.0129,
-  "inflationScore": 0.3586,
+  "growthScore": 0.0242,
+  "inflationScore": 0.3599,
   "growthDir": "flat",
   "inflationDir": "accelerating",
-  "confidence": 0.743,
+  "confidence": 0.768,
   "favors": [
    "XLE",
    "XLF",
@@ -27,15 +27,15 @@
   "drivers": [
    {
     "signal": "DGS10",
-    "value": 0.948
-   },
-   {
-    "signal": "BAMLH0A0HYM2",
-    "value": 0.878
+    "value": 0.953
    },
    {
     "signal": "DGS2",
-    "value": 0.853
+    "value": 0.872
+   },
+   {
+    "signal": "BAMLH0A0HYM2",
+    "value": 0.867
    },
    {
     "signal": "DEXUSEU",
@@ -51,16 +51,16 @@
    },
    {
     "signal": "VIXCLS",
-    "value": 0.053
+    "value": 0.023
    }
   ],
   "asOfInputs": {
    "DCOILWTICO": "2026-09-29",
-   "BAMLH0A0HYM2": "2026-10-02",
+   "BAMLH0A0HYM2": "2026-10-05",
    "T10Y2Y": "2026-10-05",
-   "VIXCLS": "2026-10-02",
-   "DGS10": "2026-10-02",
-   "DGS2": "2026-10-02",
+   "VIXCLS": "2026-10-05",
+   "DGS10": "2026-10-05",
+   "DGS2": "2026-10-05",
    "DEXUSEU": "2026-10-02"
   },
   "growthYoY": 0.021916,
@@ -237,5 +237,5 @@
   ]
  },
  "_nowcast_note": "current = fresh market nowcast (quad_nowcast.py); history = FRED GDP/CPI monthly; officialLatest = last GDP/CPI print.",
- "nowcast_generated_at": "2026-10-06T02:26:44.341089+00:00"
+ "nowcast_generated_at": "2026-10-07T01:45:09.950451+00:00"
 }
