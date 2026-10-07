@@ -59,6 +59,7 @@ break the workflow.
 """
 
 import json
+import os
 import sys
 import time
 from datetime import datetime
@@ -115,6 +116,12 @@ def load_tickers_from_file():
     Returns deduped list of equity tickers.
     """
     if not TICKERS_FILE.exists():
+        # In Actions, a missing tickers.txt means a broken/partial checkout - the
+        # built-in list (US mega-caps) would be written into THIS repo as if it
+        # were its universe (that's how TRAPP2-1 got 106 US company files).
+        if os.environ.get("GITHUB_ACTIONS"):
+            print(f"::error::[company-facts] {TICKERS_FILE} not found - refusing the built-in fallback in CI")
+            return []
         print(f"[company-facts] WARNING: {TICKERS_FILE} not found, using built-in fallback list")
         return BUILT_IN_TICKERS
 
@@ -467,6 +474,9 @@ def fetch_ticker(ticker):
 
 def main():
     tickers = load_tickers_from_file()
+    if not tickers:
+        log("No tickers to fetch - nothing written")
+        return 1
     log(f"Fetching {len(tickers)} tickers from tickers.txt into {COMPANY_DIR}")
     manifest = {
         "generatedAt": datetime.utcnow().isoformat() + "Z",
@@ -495,9 +505,29 @@ def main():
         # (find_qid + fetch_facts) so effective rate is ~1 query / 750ms.
         time.sleep(1.5)
 
+    pruned = prune_orphans(tickers) if success else []
+    if pruned:
+        manifest["prunedOrphans"] = pruned
     MANIFEST_FILE.write_text(json.dumps(manifest, indent=2))
-    log(f"Done: {success}/{len(tickers)} successful")
-    return 0
+    log(f"Done: {success}/{len(tickers)} successful · {len(pruned)} orphan file(s) pruned")
+    return 0 if (success or not tickers) else 1
+
+
+def prune_orphans(universe):
+    """Delete company files whose ticker is no longer in this repo's universe
+    (old tickers, or a past fallback run). Only called after a run that wrote
+    at least one file, so a total fetch failure never empties the folder."""
+    keep = {t.upper() for t in universe}
+    pruned = []
+    for f in sorted(COMPANY_DIR.glob("*.json")):
+        if f.name.startswith("_"):
+            continue
+        if f.stem.upper() not in keep:
+            f.unlink()
+            pruned.append(f.stem)
+    if pruned:
+        log(f"Pruned {len(pruned)} orphan company file(s): {', '.join(pruned[:12])}{' ...' if len(pruned) > 12 else ''}")
+    return pruned
 
 
 if __name__ == "__main__":
