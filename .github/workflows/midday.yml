@@ -75,52 +75,28 @@ jobs:
       - name: Compute Markov transitions
         run: python pipeline/compute_transitions.py
 
-      - name: Commit & push (latest-run-wins, conflict-proof)
+      - name: Commit & push (midday scope only)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # Nothing changed? Done.
-          git add -A data/
-          if git diff --staged --quiet; then
-            echo "No regime changes to commit."
-            exit 0
-          fi
-          echo "=== files staged ==="
-          git diff --staged --name-only
-
-          # Commit our generated output locally first.
+          # SCOPED to this job's outputs. The old step staged ALL of data/ and, if
+          # a merge failed, copied this run's whole data/ tree over origin -
+          # reverting every other workflow's files (tape, fx, leadership, ...).
+          OWN="data/macro/ data/worldbank_countries.json data/signals.json data/regime_current.json data/regime_history.json"
+          for p in $OWN; do git add -A "$p" 2>/dev/null || true; done
+          if git diff --staged --quiet; then echo "No changes."; exit 0; fi
+          echo "=== files staged ==="; git diff --staged --name-only
           git commit -m "Mid-day regime refresh $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-
-          # Push with a rebase-free "our output wins" retry. If the remote moved,
-          # we fetch it, replay ONLY our commit's file changes on top via a
-          # merge that always resolves in our favor (-X ours), and push again.
+          git stash push --include-untracked -q -m leftovers 2>/dev/null || true
           for i in 1 2 3 4 5; do
-            if git push origin HEAD:main; then
-              echo "Push succeeded on attempt $i"
-              exit 0
-            fi
-            echo "Push attempt $i rejected — remote moved. Reconciling (ours wins) and retrying."
+            if git push origin HEAD:main; then echo "Pushed on attempt $i"; exit 0; fi
+            echo "Push rejected - merging remote (ours wins for OUR files) and retrying"
             git fetch origin main
-            # Merge the new remote tip into our branch, auto-resolving any clash
-            # in the generated files to OUR version. -X ours never leaves
-            # unmerged files, so the next push is clean.
-            git merge -X ours --no-edit origin/main || {
-              echo "Merge hit an unexpected state; forcing our tree on top of origin."
-              git merge --abort 2>/dev/null || true
-              # Last resort: re-base our single commit onto origin by resetting
-              # to origin and re-committing our working files.
-              TMP=$(mktemp -d)
-              cp -r data "$TMP"/data
-              git reset --hard origin/main
-              rm -rf data
-              cp -r "$TMP"/data data
-              git add -A data/
-              git commit -m "Mid-day regime refresh (reconciled) $(date -u +%Y-%m-%dT%H:%M:%SZ)" || true
-              rm -rf "$TMP"
-            }
+            git merge -X ours origin/main --no-edit 2>/dev/null || true
+            if [ -f .git/MERGE_HEAD ]; then
+              for p in $OWN; do git checkout --ours -- "$p" 2>/dev/null || true; git add -A "$p" 2>/dev/null || true; done
+              git commit --no-edit 2>/dev/null || true
+            fi
             sleep $((i * 3))
           done
-
-          echo "ERROR: could not push after 5 attempts."
-          exit 1
+          echo "ERROR: could not push after 5 attempts."; exit 1
