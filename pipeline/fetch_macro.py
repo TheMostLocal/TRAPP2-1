@@ -66,6 +66,10 @@ SERIES = [
     ("GDPC1",        "Real GDP (chained 2017 $)",            "quarterly"),
     ("RSAFS",        "Retail Sales",                         "monthly"),
     ("ICSA",         "Initial Jobless Claims",               "weekly"),
+    # Fed policy (z90): the target range itself, so the Fed tab records every
+    # FOMC decision from data instead of a hand-typed list.
+    ("DFEDTARU",     "Fed Funds Target Range - Upper",       "daily"),
+    ("DFEDTARL",     "Fed Funds Target Range - Lower",       "daily"),
 ]
 
 
