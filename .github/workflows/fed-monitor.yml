@@ -1,0 +1,51 @@
+name: Fed Monitor (QE/QT + FOMC + NY Fed)
+
+# Writes data/fed/monitor.json for the app's Fed tab (z92):
+#   H.4.1 balance sheet (FRED: WALCL, WSHOTSL, WSHOMCB, WRESBAL, WTREGEN, RRPONTSYD)
+#   FOMC statements / minutes / projections + Fed speeches (federalreserve.gov RSS)
+#   SEP medians (FRED) · NY Fed SOMA summary + latest operations (markets.newyorkfed.org)
+# Times are UTC and chosen around the releases:
+#   13:00 Mon-Fri   morning sweep (overnight speeches, NY Fed operation results)
+#   18:45 Mon-Fri   after a 2:00pm ET FOMC statement (EDT; 19:45 covers EST)
+#   21:00 Thu       after the H.4.1 release (4:30pm ET)
+on:
+  schedule:
+    - cron: '0 13 * * 1-5'
+    - cron: '45 18 * * 1-5'
+    - cron: '45 19 * * 1-5'
+    - cron: '0 21 * * 4'
+  workflow_dispatch:
+
+concurrency:
+  group: trapp2-1-fed-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build data/fed/monitor.json
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          FED_API_KEY: ${{ secrets.FED_API_KEY }}
+        run: python pipeline/fetch_fed_monitor.py
+      - name: Commit & push (scoped to data/fed/, retry, never force)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/fed/
+          if git diff --staged --quiet; then echo "No changes."; exit 0; fi
+          git commit -m "Fed monitor $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          for i in 1 2 3 4 5; do
+            if git push; then echo "pushed on attempt $i"; exit 0; fi
+            git fetch origin && git merge -X ours origin/main -m "merge remote" || true
+            sleep $((i * 5))
+          done
+          echo "::error::push failed after 5 attempts"; exit 1
