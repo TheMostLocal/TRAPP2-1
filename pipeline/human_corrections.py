@@ -1,611 +1,391 @@
+#!/usr/bin/env python3
 """
-TRAPP2 Company Facts Fetcher
-==============================
+human_corrections.py — apply XTRAPP human corrections to backend data.
 
-Pulls structured company information from Wikidata (free, no API key, CC0-licensed)
-and writes per-ticker JSON files to data/company/<TICKER>.json.
+XTRAPP is the human-in-the-loop store. Its corrections OUTRANK pulled data, so
+every pipeline that feeds the bot, research grades or Supabase applies them
+right after the pull. The app already does the same on the frontend
+(resolveFieldValue: verified override -> active override -> fresh value).
 
-Wikidata properties used (in SPARQL Pxxx form):
-    P31     instance-of (filter to "business")
-    P249    stock ticker symbol     (matches our ticker)
-    P414    stock exchange          (NASDAQ / NYSE / etc.)
-    P169    chief executive officer
-    P3320   board member
-    P488    chairperson
-    P1037   director / manager (alt path)
-    P112    founder
-    P159    headquarters location
-    P571    inception date          (IPO ~= founding for many)
-    P1128   employees
-    P856    official website
-    P946    ISIN
-    P127    owned by
-    P127    operating area
-    P3320   board members
-    P1342   number of seats
-    P452    industry
-    P1056   product or material produced
-    P2541   operating area (country)
+    python pipeline/human_corrections.py master   # equity repos: data/master.json
+    python pipeline/human_corrections.py grades   # TRAPP2-ANALYTICS: data/research_grades.json
 
-Strategy:
-  1. Resolve the Wikidata entity for each ticker using P249 lookup
-  2. Pull all available properties in a single SPARQL query
-  3. Use the Wikibase API to get linked entity labels (CEO name, board member names, etc.)
-  4. Normalize to the schema the app's renderCompanyTab expects
+Source: <owner>/XTRAPP/main/data/xtrapp_data.json (raw, public).
+    - overrides:   { TICKER: { field: {value, setAt, expiresAt, verified, source} } }
+                   (legacy flat values are accepted and treated as permanent)
+    - humanGrades: { TICKER: {ticker, grade, status, note, updatedAt} }
+Optional local fallback: data/overrides.json (the Editor's "Export for Backend"),
+merged per field with XTRAPP, newer setAt wins.
 
-Output schema:
-{
-  "ticker": "AAPL",
-  "qid": "Q312",
-  "fetchedAt": "2026-05-18T...",
-  "source": "wikidata",
-  "name": "Apple Inc.",
-  "description": "...",
-  "industry": "...",
-  "website": "https://www.apple.com",
-  "headquarters": "Cupertino, California, US",
-  "employees": 161000,
-  "isin": "US0378331005",
-  "inception": "1976-04-01",
-  "executives": [{"name": "Tim Cook", "role": "Chief Executive Officer"}],
-  "board":      [{"name": "Arthur D. Levinson", "role": "Chairperson"}, ...],
-  "founders":   [{"name": "Steve Jobs"}, ...],
-  "products":   [{"name": "iPhone"}, ...],
-  "countries":  [{"name": "United States"}, ...],
-}
+Rules (same as the app):
+    * An override is ACTIVE until its expiresAt (ms); null = permanent.
+      Expired -> the pulled value shows through again.
+    * Only tickers already present in this repo's file are touched - a
+      correction never creates a row (4 repos share one XTRAPP).
+    * The pulled value is preserved in row["_pulled"][column] so provenance is
+      never lost; row["_overridden"] lists corrected columns.
+    * Idempotent: re-running keeps the ORIGINAL pulled value, and a correction
+      that has since expired / been removed is rolled back to its pulled value.
+    * A human grade is active when it has a grade letter, status is
+      graded/confirmed, and it is younger than 92 days (the app's TTL).
+    * Never blocks a pipeline: if XTRAPP can't be fetched, nothing changes and
+      the step exits 0 with a warning.
 
-Runs in the nightly workflow. Best-effort: individual ticker failures don't
-break the workflow.
+master.csv is deliberately NOT patched: the app reads master.csv and layers the
+same corrections itself, which keeps its "pulled X -> you set Y" display honest.
 """
-
 import json
+import math
+import os
 import sys
-import time
-from datetime import datetime
+import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 
-import requests
-
-# Repo owner — resolved at runtime so the pipeline follows the repos to any
-# GitHub account. Actions sets GITHUB_REPOSITORY_OWNER automatically;
-# VALUATIO_OWNER (repo variable/env) overrides; TheMostLocal is the fallback.
-_GH_OWNER = (__import__("os").environ.get("VALUATIO_OWNER")
-             or __import__("os").environ.get("GITHUB_REPOSITORY_OWNER")
+_GH_OWNER = (os.environ.get("VALUATIO_OWNER")
+             or os.environ.get("GITHUB_REPOSITORY_OWNER")
              or "TheMostLocal").strip()
+XTRAPP_URL = os.environ.get(
+    "XTRAPP_URL",
+    f"https://raw.githubusercontent.com/{_GH_OWNER}/XTRAPP/main/data/xtrapp_data.json")
+DATA = Path(__file__).resolve().parent.parent / "data"
+MASTER_JSON = DATA / "master.json"
+GRADES_JSON = DATA / "research_grades.json"
+LOCAL_OVERRIDES = DATA / "overrides.json"
 
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
-WIKIDATA_SPARQL = "https://query.wikidata.org/sparql"
-WIKIDATA_API = "https://www.wikidata.org/w/api.php"
+GRADE_TTL_MS = 92 * 24 * 60 * 60 * 1000
 
-UA = f"TRAPP2/1.0 (https://github.com/{_GH_OWNER}/TRAPP2; financial-data-app) python-requests"
-HEADERS = {"User-Agent": UA, "Accept": "application/sparql-results+json"}
-
-ROOT = Path(__file__).resolve().parent.parent
-COMPANY_DIR = ROOT / "data" / "company"
-TICKERS_FILE = ROOT / "data" / "tickers.txt"
-COMPANY_DIR.mkdir(parents=True, exist_ok=True)
-MANIFEST_FILE = COMPANY_DIR / "_manifest.json"
-
-# Skip tickers that can't have meaningful Wikidata company entries.
-# These are derivatives / indexes / ETFs / FX / crypto / futures — no company behind them.
-NON_COMPANY_PATTERNS = (
-    "=F", "=X", "-USD", "-USDT",  # futures, FX, crypto
-    "!",                            # TradingView-style continuous futures (CL1!, ES1!, etc.)
-    ".PVT",                         # private/unlisted entities (no public Wikidata)
-)
-NON_COMPANY_PREFIXES = ("^",)  # indexes
-NON_COMPANY_TICKERS = {
-    # Known ETFs — they have Wikidata entries but they're funds, not companies
-    "SPY", "QQQ", "DIA", "IWM", "VOO", "VTI", "VEA", "VWO", "EFA", "EEM",
-    "XLK", "XLF", "XLV", "XLE", "XLI", "XLP", "XLY", "XLU", "XLB", "XLRE", "XLC",
-    "TLT", "IEF", "SHY", "BND", "AGG", "LQD", "HYG", "JNK", "TIP", "MBB", "EMB",
-    "GOVT", "VCSH", "VCIT", "VCLT", "BIV", "BSV", "BLV", "BNDX",
-    "GLD", "SLV", "USO", "UNG", "DBA", "DBC", "GSG",
-    "IYT", "IYR", "VNQ", "XBI", "IBB", "XHB", "ITB", "XRT",
-    "ARKK", "SOXL", "TQQQ", "SQQQ", "UVXY", "VXX", "UUP",
-    "RSP", "SPLV", "SPHQ", "MTUM", "QUAL", "USMV", "SCHD",
+# App override key -> (master.json column, value transform). Keys not listed map
+# to the same-named column. Columns the master doesn't have are still written
+# (JSON tolerates extra keys; downstream readers that know them can use them).
+FIELD_MAP = {
+    "website":       ("web_url", None),
+    # App stores dividendYield as a DECIMAL (0.0254); master.json carries the
+    # pipeline's PERCENT (2.54) in dividend_yield.
+    "dividendYield": ("dividend_yield", lambda v: round(v * 100, 6) if isinstance(v, (int, float)) else v),
+    "marketCap":     ("marketcap", None),
+    "changePct":     ("changepct", None),
+    "priorClose":    ("closeyest", None),
 }
+# Bookkeeping keys never treated as data columns.
+_META = {"_pulled", "_overridden", "_correctedBy", "_correctedAt"}
 
-def load_tickers_from_file():
-    """
-    Load tickers from data/tickers.txt — one ticker per line, comments with #.
-    Filters out derivatives, indexes, ETFs, FX, crypto, futures, options.
-    Returns deduped list of equity tickers.
-    """
-    if not TICKERS_FILE.exists():
-        # In Actions, a missing tickers.txt means a broken/partial checkout. The
-        # built-in list (US mega-caps) would be written into THIS repo as if it
-        # were its universe - that's how TRAPP2-1 got 106 US company files.
-        if __import__("os").environ.get("GITHUB_ACTIONS"):
-            print(f"::error::[company-facts] {TICKERS_FILE} not found - refusing the built-in fallback in CI")
-            return []
-        print(f"[company-facts] WARNING: {TICKERS_FILE} not found, using built-in fallback list")
-        return BUILT_IN_TICKERS
-
-    tickers = []
-    seen = set()
-    for line in TICKERS_FILE.read_text().splitlines():
-        # Strip comments
-        t = line.split("#")[0].strip().upper()
-        if not t:
-            continue
-        # Filter non-companies
-        if any(t.endswith(suffix) for suffix in NON_COMPANY_PATTERNS):
-            continue
-        if any(t.startswith(prefix) for prefix in NON_COMPANY_PREFIXES):
-            continue
-        # Option contract strings (e.g. SPY261204C00800000) — too long, contain digits at end
-        if len(t) > 10 and any(c.isdigit() for c in t[-6:]):
-            continue
-        if t in NON_COMPANY_TICKERS:
-            continue
-        if t in seen:
-            continue
-        seen.add(t)
-        tickers.append(t)
-    return tickers
+# Exact mirror of compute_research.grade_letter() bands -> a human letter maps to
+# the MIDPOINT of its band, so gradeScore consumers (bot, ticker_snapshot) agree.
+_BANDS = [(93, 100, "A+"), (85, 93, "A"), (78, 85, "A-"), (70, 78, "B+"), (62, 70, "B"),
+          (54, 62, "B-"), (46, 54, "C+"), (38, 46, "C"), (30, 38, "C-"), (22, 30, "D+"),
+          (14, 22, "D"), (0, 14, "F")]
+GRADE_SCORE = {g: round((lo + hi) / 2, 2) for lo, hi, g in _BANDS}
 
 
-# Fallback list when tickers.txt is missing — mirrors the major tickers the app cares about.
-BUILT_IN_TICKERS = [
-    # Mega-cap tech / "magnificent seven"
-    "AAPL", "MSFT", "GOOGL", "GOOG", "AMZN", "META", "TSLA", "NVDA",
-    # Other mega-caps
-    "BRK.B", "JPM", "V", "MA", "WMT", "PG", "JNJ", "UNH", "HD", "BAC",
-    "XOM", "CVX", "LLY", "MRK", "ABBV", "PFE", "PEP", "KO", "COST",
-    "AVGO", "ORCL", "ADBE", "CRM", "NFLX", "AMD", "INTC", "QCOM", "CSCO",
-    "DIS", "T", "VZ", "TMUS", "CMCSA", "MCD", "NKE", "SBUX",
-    # Industrials / aero / autos
-    "BA", "CAT", "GE", "MMM", "HON", "LMT", "RTX", "F", "GM",
-    # Financials
-    "GS", "MS", "C", "WFC", "AXP", "BLK", "SCHW", "USB", "PNC",
-    # Energy + utilities
-    "COP", "SLB", "EOG", "MPC", "PSX", "VLO", "OXY", "NEE", "DUK", "SO",
-    # Healthcare
-    "ABT", "TMO", "DHR", "BMY", "AMGN", "GILD", "MDT", "ISRG", "REGN",
-    # Consumer
-    "TGT", "LOW", "CVS", "EL", "CL", "TJX", "ROST",
-    # Big tech / SaaS
-    "INTU", "AMAT", "NOW", "PYPL", "SHOP", "UBER", "ABNB", "SPOT",
-    # Railroads / transportation (your IYT holdings)
-    "UNP", "CSX", "NSC", "UPS", "FDX", "ODFL", "JBHT", "CHRW", "EXPD",
-    # Communications / media
-    "WBD", "PARA",
-]
-
-# Wikidata properties → human label
-PROP_LABELS = {
-    "P169": "Chief Executive Officer",
-    "P3320": "Board Member",
-    "P488": "Chairperson",
-    "P488": "Chairperson",
-    "P112": "Founder",
-    "P127": "Owner",
-}
+def now_ms():
+    return int(datetime.now(timezone.utc).timestamp() * 1000)
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-def log(msg):
-    print(f"[company-facts] {msg}", flush=True)
-
-
-def sparql_query(query, retries=4):
-    """Execute a SPARQL query against Wikidata. Returns parsed JSON results or None.
-    
-    Wikidata's public SPARQL endpoint is heavily rate-limited and flaky.
-    We retry with exponential backoff. Empirically: 1 retry is insufficient at
-    sustained scale; 4 retries with backoff catches most transient failures."""
-    for attempt in range(retries + 1):
-        try:
-            r = requests.get(
-                WIKIDATA_SPARQL,
-                params={"query": query, "format": "json"},
-                headers=HEADERS,
-                timeout=45,
-            )
-            if r.status_code == 429:
-                # Rate limited — back off and retry. The Retry-After header is
-                # sometimes missing or unreasonable; use a sane backoff.
-                wait = max(int(r.headers.get("Retry-After", 0)), 5 * (attempt + 1))
-                log(f"  rate-limited, waiting {wait}s (attempt {attempt + 1}/{retries + 1})")
-                time.sleep(wait)
-                continue
-            if r.status_code in (500, 502, 503, 504):
-                # Server-side flake — back off
-                wait = 3 * (attempt + 1)
-                log(f"  server error {r.status_code}, waiting {wait}s")
-                time.sleep(wait)
-                continue
-            if r.status_code != 200:
-                log(f"  unexpected status {r.status_code}")
-                return None
-            return r.json()
-        except requests.RequestException as e:
-            wait = 2 * (attempt + 1)
-            log(f"  SPARQL request failed: {e}, waiting {wait}s")
-            time.sleep(wait)
-        except ValueError as e:
-            # JSON decode error — sometimes endpoint returns HTML on errors
-            log(f"  SPARQL JSON decode failed: {e}")
-            return None
-    log(f"  SPARQL exhausted retries")
-    return None
-
-
-def find_qid_for_ticker(ticker):
-    """
-    Look up the Wikidata QID for a ticker.
-
-    THREE STRATEGIES tried in order, because Wikidata's P249 (ticker symbol)
-    is sparsely populated and only the most-followed companies have it set
-    cleanly. Without these fallbacks, the script returns None for ~70% of
-    tickers and writes no JSON file — which is exactly the bug the user
-    reported (only NFLX worked).
-
-      1. P249 exact match — works for ~30% of tickers (well-curated entries)
-      2. Wikidata Search API by ticker — works for ~50% more (uses Elastic
-         search index which is less strict than SPARQL P249)
-      3. Common-name fallback — last resort, queries by ticker as a name
-
-    Returns (qid, label) or (None, None).
-    """
-    # Strategy 1: P249 SPARQL lookup (most precise when it works)
-    query = f"""
-    SELECT ?company ?companyLabel (COUNT(?sitelink) AS ?links) WHERE {{
-      ?company wdt:P249 "{ticker}" .
-      ?company wdt:P31/wdt:P279* wd:Q4830453 .
-      OPTIONAL {{ ?sitelink schema:about ?company . }}
-      SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
-    }}
-    GROUP BY ?company ?companyLabel
-    ORDER BY DESC(?links)
-    LIMIT 1
-    """
-    result = sparql_query(query)
-    if result:
-        bindings = result.get("results", {}).get("bindings", [])
-        if bindings:
-            qid_uri = bindings[0]["company"]["value"]
-            qid = qid_uri.rsplit("/", 1)[-1]
-            label = bindings[0].get("companyLabel", {}).get("value")
-            log(f"  ✓ P249 match: {qid} ({label})")
-            return qid, label
-
-    # Strategy 2: Wikidata Search API (Elastic-based, much more forgiving)
-    # Returns an array of candidates; we filter to those that look like companies
-    # by checking their P31 (instance-of) values match Q4830453 (business).
+def _ts(v):
+    """ms timestamp from a number (ms) or ISO string; 0 if unknown."""
+    if v is None:
+        return 0
+    if isinstance(v, (int, float)):
+        return int(v) if math.isfinite(v) else 0
     try:
-        time.sleep(0.5)
-        r = requests.get(
-            "https://www.wikidata.org/w/api.php",
-            params={
-                "action": "wbsearchentities",
-                "search": ticker,
-                "language": "en",
-                "format": "json",
-                "type": "item",
-                "limit": 10,
-            },
-            headers=HEADERS,
-            timeout=20,
-        )
-        if r.status_code == 200:
-            candidates = r.json().get("search", [])
-            for cand in candidates:
-                qid = cand.get("id")
-                if not qid:
-                    continue
-                # Verify it's actually a company via a focused SPARQL check
-                verify_q = f"""
-                ASK {{
-                  wd:{qid} wdt:P31/wdt:P279* wd:Q4830453 .
-                }}
-                """
-                time.sleep(0.5)
-                vr = sparql_query(verify_q)
-                if vr and vr.get("boolean") is True:
-                    label = cand.get("label") or cand.get("description") or ticker
-                    log(f"  ✓ Search API match: {qid} ({label})")
-                    return qid, label
-    except Exception as e:
-        log(f"  Search API error: {e}")
-
-    # Strategy 3: P414 (stock exchange) + ticker partial-match via SPARQL
-    # Some entities have ticker info on the stock-exchange statement rather than
-    # via P249. This catches another ~10% of tickers.
-    query3 = f"""
-    SELECT ?company ?companyLabel WHERE {{
-      ?company p:P414 ?ex .
-      ?ex pq:P249 "{ticker}" .
-      ?company wdt:P31/wdt:P279* wd:Q4830453 .
-      SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
-    }}
-    LIMIT 1
-    """
-    result = sparql_query(query3)
-    if result:
-        bindings = result.get("results", {}).get("bindings", [])
-        if bindings:
-            qid_uri = bindings[0]["company"]["value"]
-            qid = qid_uri.rsplit("/", 1)[-1]
-            label = bindings[0].get("companyLabel", {}).get("value")
-            log(f"  ✓ P414 qualifier match: {qid} ({label})")
-            return qid, label
-
-    return None, None
-
-
-def fetch_company_facts(qid, ticker):
-    """
-    Fetch all properties of interest for a company QID in a single SPARQL query.
-    Returns a dict of normalized fields.
-    """
-    # GROUP_CONCAT with separator |  lets us collect multi-value lists (board members,
-    # founders, products) in a single result row instead of issuing N queries.
-    query = f"""
-    SELECT
-      ?companyLabel ?description
-      ?websiteUrl
-      ?isin
-      ?inception
-      ?employees
-      ?industryLabel
-      ?hqLabel
-      (GROUP_CONCAT(DISTINCT ?ceoLabel; separator="|") AS ?ceos)
-      (GROUP_CONCAT(DISTINCT ?chairLabel; separator="|") AS ?chairs)
-      (GROUP_CONCAT(DISTINCT ?boardLabel; separator="|") AS ?boards)
-      (GROUP_CONCAT(DISTINCT ?founderLabel; separator="|") AS ?founders)
-      (GROUP_CONCAT(DISTINCT ?productLabel; separator="|") AS ?products)
-      (GROUP_CONCAT(DISTINCT ?countryLabel; separator="|") AS ?countries)
-    WHERE {{
-      BIND(wd:{qid} AS ?company)
-      OPTIONAL {{ ?company schema:description ?description . FILTER(LANG(?description) = "en") }}
-      OPTIONAL {{ ?company wdt:P856  ?websiteUrl }}
-      OPTIONAL {{ ?company wdt:P946  ?isin }}
-      OPTIONAL {{ ?company wdt:P571  ?inception }}
-      OPTIONAL {{ ?company wdt:P1128 ?employees }}
-      OPTIONAL {{ ?company wdt:P452  ?industry .  ?industry rdfs:label ?industryLabel . FILTER(LANG(?industryLabel) = "en") }}
-      OPTIONAL {{ ?company wdt:P159  ?hq .        ?hq       rdfs:label ?hqLabel       . FILTER(LANG(?hqLabel)       = "en") }}
-      OPTIONAL {{ ?company wdt:P169  ?ceo .       ?ceo      rdfs:label ?ceoLabel      . FILTER(LANG(?ceoLabel)      = "en") }}
-      OPTIONAL {{ ?company wdt:P488  ?chair .     ?chair    rdfs:label ?chairLabel    . FILTER(LANG(?chairLabel)    = "en") }}
-      OPTIONAL {{ ?company wdt:P3320 ?board .     ?board    rdfs:label ?boardLabel    . FILTER(LANG(?boardLabel)    = "en") }}
-      OPTIONAL {{ ?company wdt:P112  ?founder .   ?founder  rdfs:label ?founderLabel  . FILTER(LANG(?founderLabel)  = "en") }}
-      OPTIONAL {{ ?company wdt:P1056 ?product .   ?product  rdfs:label ?productLabel  . FILTER(LANG(?productLabel)  = "en") }}
-      OPTIONAL {{ ?company wdt:P2541 ?country .   ?country  rdfs:label ?countryLabel  . FILTER(LANG(?countryLabel)  = "en") }}
-      SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
-    }}
-    GROUP BY ?companyLabel ?description ?websiteUrl ?isin ?inception ?employees ?industryLabel ?hqLabel
-    LIMIT 1
-    """
-    result = sparql_query(query)
-    if not result:
-        return None
-    bindings = result.get("results", {}).get("bindings", [])
-    if not bindings:
-        return None
-    b = bindings[0]
-
-    def get(key):
-        return b.get(key, {}).get("value")
-
-    def split_list(key):
-        """Parse GROUP_CONCAT result into a list of unique non-empty strings."""
-        raw = get(key) or ""
-        if not raw:
-            return []
-        items = [s.strip() for s in raw.split("|") if s.strip()]
-        # Deduplicate while preserving order
-        seen = set()
-        out = []
-        for item in items:
-            if item not in seen:
-                seen.add(item)
-                out.append(item)
-        return out
-
-    # Normalize executives: CEO + Chair (separate roles), then board members
-    executives = []
-    for ceo in split_list("ceos"):
-        executives.append({"name": ceo, "role": "Chief Executive Officer"})
-    for chair in split_list("chairs"):
-        # If chair is already in executives as CEO, don't duplicate
-        if not any(e["name"] == chair for e in executives):
-            executives.append({"name": chair, "role": "Chairperson"})
-
-    board = [{"name": name, "role": "Board Member"} for name in split_list("boards")]
-    founders = [{"name": name} for name in split_list("founders")]
-    products = [{"name": name} for name in split_list("products")]
-    countries = [{"name": name} for name in split_list("countries")]
-
-    # Parse employees (might be "161000" or similar)
-    employees = get("employees")
-    if employees:
-        try:
-            employees = int(float(employees))
-        except (ValueError, TypeError):
-            employees = None
-
-    return {
-        "name": get("companyLabel"),
-        "description": get("description"),
-        "website": get("websiteUrl"),
-        "isin": get("isin"),
-        "inception": (get("inception") or "")[:10] or None,
-        "employees": employees,
-        "industry": get("industryLabel"),
-        "headquarters": get("hqLabel"),
-        "executives": executives,
-        "board": board,
-        "founders": founders,
-        "products": products,
-        "countries": countries,
-    }
-
-
-def fetch_ticker(ticker):
-    """Resolve a ticker → write its company facts JSON file. Returns (ok, msg)."""
-    qid, _label = find_qid_for_ticker(ticker)
-    if not qid:
-        # Write a lightweight marker so this ticker isn't re-attempted every
-        # night (no-QID tickers — ETFs, obscure foreign listings — rarely gain
-        # a Wikidata entry suddenly). It still re-checks after the freshness
-        # window expires, in case an entry was added.
-        try:
-            (COMPANY_DIR / f"{ticker}.json").write_text(json.dumps({
-                "ticker": ticker, "fetchedAt": datetime.utcnow().isoformat() + "Z",
-                "source": "wikidata", "_noEntity": True, "name": None,
-            }, indent=2))
-        except Exception:
-            pass
-        return False, "no Wikidata QID found"
-    facts = fetch_company_facts(qid, ticker)
-    if not facts or not facts.get("name"):
-        return False, f"empty facts for QID {qid}"
-
-    output = {
-        "ticker": ticker,
-        "qid": qid,
-        "fetchedAt": datetime.utcnow().isoformat() + "Z",
-        "source": "wikidata",
-        **facts,
-    }
-    out_path = COMPANY_DIR / f"{ticker}.json"
-    out_path.write_text(json.dumps(output, indent=2))
-
-    n_exec = len(facts["executives"])
-    n_board = len(facts["board"])
-    n_products = len(facts["products"])
-    return True, f"QID={qid}, {n_exec} execs, {n_board} board, {n_products} products"
-
-
-def _is_fresh(ticker, max_age_days=30):
-    """True if this ticker's company JSON exists and was fetched recently —
-    company facts (founded, HQ, leadership) rarely change, so we skip fresh ones.
-    This is what keeps the nightly run under the 1-hour limit: most nights only
-    a handful of new/stale tickers actually need fetching."""
-    out_path = COMPANY_DIR / f"{ticker}.json"
-    if not out_path.exists():
-        return False
-    try:
-        data = json.loads(out_path.read_text())
-        fetched = data.get("fetchedAt") or data.get("_fetchedAt")
-        if not fetched:
-            # No timestamp — fall back to file mtime.
-            age = time.time() - out_path.stat().st_mtime
-            return age < max_age_days * 86400
-        ts = datetime.fromisoformat(fetched.replace("Z", "+00:00"))
-        age_days = (datetime.now(ts.tzinfo) - ts).total_seconds() / 86400
-        return age_days < max_age_days
+        return int(datetime.fromisoformat(str(v).replace("Z", "+00:00")).timestamp() * 1000)
     except Exception:
-        return False
+        return 0
 
 
-def main():
-    import os as _os
-    tickers = load_tickers_from_file()
-    if not tickers:
-        log("No tickers to fetch - nothing written")
-        return 1
+def _finite(o):
+    if isinstance(o, float):
+        return o if math.isfinite(o) else None
+    if isinstance(o, dict):
+        return {k: _finite(v) for k, v in o.items()}
+    if isinstance(o, list):
+        return [_finite(v) for v in o]
+    return o
 
-    # Time budget: stop fetching ~10 min before GitHub's 60-min job limit so the
-    # commit step always runs and we never lose a half-finished run. The next
-    # night picks up whatever's still stale. Override via FACTS_BUDGET_SECS.
-    budget_secs = int(_os.environ.get("FACTS_BUDGET_SECS", str(48 * 60)))
-    # Freshness window — re-fetch a ticker only if its file is older than this.
-    max_age_days = int(_os.environ.get("FACTS_MAX_AGE_DAYS", "30"))
-    # Force a full refresh (ignore freshness) with FACTS_FORCE=1.
-    force = _os.environ.get("FACTS_FORCE", "") == "1"
-    start = time.time()
 
-    # Partition: stale/missing first (these need work), skip the fresh ones.
-    to_fetch = tickers if force else [t for t in tickers if not _is_fresh(t, max_age_days)]
-    skipped = len(tickers) - len(to_fetch)
-    log(f"Company facts: {len(tickers)} total · {skipped} fresh (skipped) · {len(to_fetch)} to fetch · budget {budget_secs}s")
-
-    # Load existing manifest so skipped tickers keep their prior status.
-    manifest = {"generatedAt": datetime.utcnow().isoformat() + "Z", "source": "wikidata", "tickers": {}}
-    if MANIFEST_FILE.exists():
-        try:
-            prior = json.loads(MANIFEST_FILE.read_text())
-            manifest["tickers"] = prior.get("tickers", {})
-        except Exception:
-            pass
-
-    success = 0
-    fetched_count = 0
-    for ticker in to_fetch:
-        # Stop if we're near the time budget — let the commit step run.
-        if time.time() - start > budget_secs:
-            log(f"⏱ Hit time budget after {fetched_count} fetches — stopping; remaining stale tickers will refresh next run.")
-            break
-        try:
-            ok, msg = fetch_ticker(ticker)
-            if ok:
-                log(f"✓ {ticker:7s} — {msg}")
-                success += 1
-            else:
-                log(f"✗ {ticker:7s} — {msg}")
-            manifest["tickers"][ticker] = {
-                "ok": ok,
-                "msg": msg,
-                "fetchedAt": datetime.utcnow().isoformat() + "Z",
-            }
-        except Exception as e:
-            log(f"✗ {ticker:7s} — exception: {type(e).__name__}: {e}")
-            manifest["tickers"][ticker] = {"ok": False, "msg": str(e)}
-        fetched_count += 1
-        time.sleep(1.5)
-
-    pruned = prune_orphans(tickers)
-    if pruned:
-        for t in pruned:
-            manifest["tickers"].pop(t, None)
-        manifest["prunedOrphans"] = pruned
-    # z99: XTRAPP leadership edits are the system override - applied to every
-    # affected company file each run (not only to the few re-fetched tonight).
+def load_xtrapp():
     try:
-        from human_corrections import apply_leadership_to_dir
-        human = apply_leadership_to_dir(COMPANY_DIR, tickers)
-        if human:
-            manifest["humanLeadership"] = human
-        log(f"XTRAPP leadership overrides: {sum(human.values())} change(s) across {len(human)} ticker(s)"
-            + (f" — {', '.join(sorted(human))}" if human else ""))
+        req = urllib.request.Request(XTRAPP_URL, headers={"User-Agent": "ValuatioHumanCorrections",
+                                                          "Cache-Control": "no-cache"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.loads(r.read().decode("utf-8"))
     except Exception as e:
-        log(f"XTRAPP leadership overrides skipped: {e}")
-    manifest["generatedAt"] = datetime.utcnow().isoformat() + "Z"
-    MANIFEST_FILE.write_text(json.dumps(manifest, indent=2))
-    log(f"Done: fetched {fetched_count}, {success} successful, {skipped} skipped as fresh, "
-        f"{len(pruned)} orphan file(s) pruned")
-    return 0
+        print(f"::warning::human corrections: could not read XTRAPP ({e}) - pulled data left as-is")
+        return None
 
 
-PRUNE_MIN_UNIVERSE = 20   # a tickers.txt smaller than this looks truncated - don't prune
+def _norm_entry(e):
+    if isinstance(e, dict) and "value" in e:
+        return e
+    return {"value": e, "setAt": 0, "expiresAt": None, "source": "legacy"}
 
 
-def prune_orphans(universe):
-    """Delete company files whose ticker is no longer in this repo's universe
-    (dropped tickers, or a past fallback run). Universe files - fresh, stale or
-    _noEntity markers - are never touched. Skipped when the universe looks
-    truncated, so a half-uploaded tickers.txt can't empty the folder."""
-    keep = {str(t).upper() for t in universe}
-    if len(keep) < PRUNE_MIN_UNIVERSE:
-        log(f"Prune skipped: universe has only {len(keep)} tickers (< {PRUNE_MIN_UNIVERSE})")
-        return []
-    pruned = []
-    for f in sorted(COMPANY_DIR.glob("*.json")):
-        if f.name.startswith("_"):
+def active_overrides(*docs, now=None):
+    """Merge override maps (newer setAt wins per ticker+field) and keep only
+    active, non-empty values. -> { TICKER: { field: value } }"""
+    now = now_ms() if now is None else now
+    merged = {}
+    for doc in docs:
+        for tk, fields in (doc or {}).items():
+            if not isinstance(fields, dict):
+                continue
+            slot = merged.setdefault(str(tk).upper(), {})
+            for f, e in fields.items():
+                e = _norm_entry(e)
+                cur = slot.get(f)
+                if cur is None or _ts(e.get("setAt")) >= _ts(cur.get("setAt")):
+                    slot[f] = e
+    out = {}
+    for tk, fields in merged.items():
+        for f, e in fields.items():
+            exp = e.get("expiresAt")
+            if exp is not None and _ts(exp) and now > _ts(exp):
+                continue
+            v = e.get("value")
+            if v is None or v == "":
+                continue
+            out.setdefault(tk, {})[f] = v
+    return out
+
+
+def apply_to_rows(rows, overrides):
+    """Patch rows in place. Returns (applied, rolled_back, touched_rows)."""
+    applied = rolled = touched = 0
+    for r in rows:
+        if not isinstance(r, dict):
             continue
-        if f.stem.upper() not in keep:
-            f.unlink()
-            pruned.append(f.stem)
-    if pruned:
-        log(f"Pruned {len(pruned)} orphan company file(s): {', '.join(pruned[:12])}{' ...' if len(pruned) > 12 else ''}")
-    return pruned
+        tk = str(r.get("ticker") or "").upper()
+        want = {}
+        for f, v in (overrides.get(tk) or {}).items():
+            col, tf = FIELD_MAP.get(f, (f, None))
+            if col in _META or col == "ticker":
+                continue
+            want[col] = tf(v) if tf else v
+        pulled = r.get("_pulled") if isinstance(r.get("_pulled"), dict) else {}
+        changed = False
+        # Roll back corrections that are no longer active.
+        for col in list(pulled):
+            if col not in want:
+                r[col] = pulled.pop(col)
+                rolled += 1
+                changed = True
+        # Apply active corrections, preserving the ORIGINAL pulled value once.
+        for col, v in want.items():
+            if col not in pulled:
+                pulled[col] = r.get(col)
+            if r.get(col) != v:
+                r[col] = v
+                changed = True
+            applied += 1
+        if pulled:
+            r["_pulled"] = pulled
+            r["_overridden"] = sorted(pulled)
+            r["_correctedBy"] = "xtrapp"
+        else:
+            for k in ("_pulled", "_overridden", "_correctedBy"):
+                r.pop(k, None)
+        if changed or pulled:
+            touched += 1
+    return applied, rolled, touched
+
+
+def active_human_grades(hg, now=None):
+    now = now_ms() if now is None else now
+    out = {}
+    for tk, g in (hg or {}).items():
+        if not isinstance(g, dict):
+            continue
+        letter = str(g.get("grade") or "").strip().upper()
+        if letter not in GRADE_SCORE:
+            continue
+        if (g.get("status") or "graded") not in ("graded", "confirmed"):
+            continue
+        at = _ts(g.get("updatedAt"))
+        if at and now - at > GRADE_TTL_MS:
+            continue
+        out[str(tk).upper()] = {"grade": letter, "updatedAt": g.get("updatedAt"), "note": g.get("note") or ""}
+    return out
+
+
+def apply_to_grades(doc, human):
+    """Patch research_grades.json byTicker in place. -> (applied, rolled_back)"""
+    by = doc.get("byTicker") if isinstance(doc, dict) else None
+    if not isinstance(by, dict):
+        return 0, 0
+    applied = rolled = 0
+    for tk, rec in by.items():
+        if not isinstance(rec, dict):
+            continue
+        h = human.get(str(tk).upper())
+        machine = rec.get("_machine")
+        if h:
+            if not isinstance(machine, dict):
+                rec["_machine"] = {"grade": rec.get("grade"), "gradeScore": rec.get("gradeScore")}
+            rec["grade"] = h["grade"]
+            rec["gradeScore"] = GRADE_SCORE[h["grade"]]
+            rec["gradeSource"] = "human"
+            rec["humanGradeAt"] = h["updatedAt"]
+            applied += 1
+        elif isinstance(machine, dict):
+            rec["grade"] = machine.get("grade")
+            rec["gradeScore"] = machine.get("gradeScore")
+            for k in ("_machine", "gradeSource", "humanGradeAt"):
+                rec.pop(k, None)
+            rolled += 1
+    return applied, rolled
+
+
+# ---------------------------------------------------------------- leadership ----
+# XTRAPP leadershipOverrides (written by the app's CEO / Management editors):
+#   people:  {slug: {name, assignedTickers, assignedRoleByTicker{T: role},
+#                    sourceFieldByTicker{T: executives|board|founders}, updatedAt}}
+#   removed: {TICKER: [names removed by the editor]}
+# The human edit is the system override (z99): removed names are dropped from the
+# pulled company facts, assigned people are added / their role corrected, and the
+# record is stamped so it's clear a human changed it. Applied to every company file
+# each run - company facts are only re-fetched every 30 days, so applying only at
+# fetch time would delay a correction by up to a month.
+LEAD_FIELDS = ("executives", "board", "founders")
+
+
+def leadership_overrides(xt=None):
+    xt = load_xtrapp() if xt is None else xt
+    lo = (xt or {}).get("leadershipOverrides") or {}
+    return lo if isinstance(lo, dict) else {}
+
+
+def _pname(p):
+    return (p.get("name") if isinstance(p, dict) else str(p or "")).strip()
+
+
+def apply_leadership(ticker, rec, lo):
+    """Mutates rec (a data/company/<T>.json record). -> number of changes."""
+    if not isinstance(rec, dict) or not lo:
+        return 0
+    T = str(ticker).upper()
+    n = 0
+    removed = {str(x).strip().lower() for x in ((lo.get("removed") or {}).get(T) or [])}
+    assigned = {_pname(p).lower() for p in (lo.get("people") or {}).values()
+                if isinstance(p, dict) and T in [str(x).upper() for x in (p.get("assignedTickers") or [])]}
+    # undo what a PREVIOUS run did for a human edit that has since been withdrawn:
+    # people it inserted are removed; pulled people whose role it corrected get
+    # their pulled role back
+    for f in LEAD_FIELDS:
+        lst = rec.get(f) or []
+        keep = []
+        for p in lst:
+            if isinstance(p, dict) and _pname(p).lower() not in assigned:
+                if p.get("_human"):
+                    n += 1
+                    continue
+                if "_pulledRole" in p:
+                    p["role"] = p.pop("_pulledRole")
+                    if p["role"] is None:
+                        p.pop("role")
+                    n += 1
+            keep.append(p)
+        rec[f] = keep
+    if removed:
+        for f in LEAD_FIELDS:
+            lst = rec.get(f) or []
+            keep = [p for p in lst if _pname(p).lower() not in removed]
+            n += len(lst) - len(keep)
+            rec[f] = keep
+    for person in (lo.get("people") or {}).values():
+        if not isinstance(person, dict) or T not in [str(x).upper() for x in (person.get("assignedTickers") or [])]:
+            continue
+        name = _pname(person)
+        if not name or name.lower() in removed:
+            continue
+        field = ((person.get("sourceFieldByTicker") or {}).get(T) or "executives")
+        field = field if field in LEAD_FIELDS else "executives"
+        role = (person.get("assignedRoleByTicker") or {}).get(T) or person.get("role") or None
+        lst = rec.setdefault(field, [])
+        hit = next((p for p in lst if isinstance(p, dict) and _pname(p).lower() == name.lower()), None)
+        if hit is None:
+            lst.insert(0, {k: v for k, v in {"name": name, "role": role, "_human": True}.items() if v is not None})
+            n += 1
+        elif role and hit.get("role") != role:
+            if "_pulledRole" not in hit:
+                hit["_pulledRole"] = hit.get("role")      # remember the pulled value so it can be restored
+            hit["role"] = role
+            n += 1
+    if n:
+        rec["_humanLeadership"] = {"changes": n, "appliedAt": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+    return n
+
+
+def apply_leadership_to_dir(company_dir, tickers=None, xt=None):
+    """Apply XTRAPP leadership overrides to every affected company file on disk.
+    -> {ticker: changes}. Only tickers mentioned by an override are touched."""
+    lo = leadership_overrides(xt)
+    if not lo:
+        return {}
+    touched = {str(t).upper() for t in (lo.get("removed") or {})}
+    for person in (lo.get("people") or {}).values():
+        if isinstance(person, dict):
+            touched |= {str(t).upper() for t in (person.get("assignedTickers") or [])}
+    if tickers is not None:
+        touched &= {str(t).upper() for t in tickers}
+    out = {}
+    for T in sorted(touched):
+        p = Path(company_dir) / f"{T}.json"
+        if not p.exists():
+            continue
+        try:
+            rec = json.loads(p.read_text())
+        except Exception:
+            continue
+        rec.pop("_humanLeadership", None)
+        n = apply_leadership(T, rec, lo)
+        if n:
+            p.write_text(json.dumps(rec, indent=2))
+            out[T] = n
+    return out
+
+
+def main(argv):
+    mode = (argv[1] if len(argv) > 1 else "master").lower()
+    x = load_xtrapp()
+    if x is None:
+        return 0
+    if mode == "master":
+        if not MASTER_JSON.exists():
+            print("human corrections: no data/master.json - nothing to do")
+            return 0
+        local = {}
+        if LOCAL_OVERRIDES.exists():
+            try:
+                local = (json.loads(LOCAL_OVERRIDES.read_text()) or {}).get("overrides") or {}
+            except Exception:
+                local = {}
+        ov = active_overrides(x.get("overrides") or {}, local)
+        rows = json.loads(MASTER_JSON.read_text())
+        if not isinstance(rows, list):
+            print("::warning::human corrections: master.json is not a row list - skipped")
+            return 0
+        applied, rolled, touched = apply_to_rows(rows, ov)
+        if applied or rolled:
+            MASTER_JSON.write_text(json.dumps(_finite(rows), separators=(",", ":"), allow_nan=False))
+        print(f"human corrections -> master.json: {len(ov)} ticker(s) corrected in XTRAPP · "
+              f"{applied} field(s) applied · {rolled} rolled back · {touched} row(s) touched")
+        return 0
+    if mode == "grades":
+        if not GRADES_JSON.exists():
+            print("human corrections: no data/research_grades.json - nothing to do")
+            return 0
+        doc = json.loads(GRADES_JSON.read_text())
+        human = active_human_grades(x.get("humanGrades") or {})
+        applied, rolled = apply_to_grades(doc, human)
+        if applied or rolled:
+            GRADES_JSON.write_text(json.dumps(_finite(doc), separators=(",", ":"), allow_nan=False))
+        print(f"human corrections -> research_grades.json: {len(human)} active human grade(s) · "
+              f"{applied} applied · {rolled} rolled back")
+        return 0
+    print(f"usage: {argv[0]} master|grades")
+    return 2
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv))
