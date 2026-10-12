@@ -1,7 +1,7 @@
 {
   "_schema": "valuatio-worldbank-v1",
   "_description": "Annual GDP + trade composition from the World Bank (free API, no key). Data is typically 6-18 months lagged.",
-  "updatedAt": "2026-10-09T20:16:06.035531Z",
+  "updatedAt": "2026-10-12T22:36:48.190800Z",
   "source": "World Bank (api.worldbank.org)",
   "countries": {
     "USA": {
@@ -42,8 +42,6 @@
       "iso3": "JPN",
       "gdpUsd": 4435162999976.94,
       "gdpUsdYear": "2025",
-      "exportsPctGdp": 21.9799093698461,
-      "exportsPctGdpYear": "2024",
       "importsPctGdp": 22.8730294879112,
       "importsPctGdpYear": "2024",
       "tradePctGdp": 44.8529388577573,
@@ -172,8 +170,6 @@
       "gdpUsdYear": "2025",
       "exportsPctGdp": 45.7630385215931,
       "exportsPctGdpYear": "2025",
-      "importsPctGdp": 40.5985621226499,
-      "importsPctGdpYear": "2025",
       "tradePctGdp": 86.3616006442431,
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 1.00701840291242,
@@ -240,16 +236,12 @@
       "importsPctGdpYear": "2025",
       "tradePctGdp": 43.3912070511204,
       "tradePctGdpYear": "2025",
-      "gdpGrowthPct": 5.10808904438025,
-      "gdpGrowthPctYear": "2025",
       "gdpRank": 15
     },
     "SAU": {
       "name": "Saudi Arabia",
       "etf": "KSA",
       "iso3": "SAU",
-      "gdpUsd": 1276942933333.33,
-      "gdpUsdYear": "2025",
       "exportsPctGdp": 29.7448740074211,
       "exportsPctGdpYear": "2025",
       "importsPctGdp": 28.1733498505598,
@@ -257,8 +249,7 @@
       "tradePctGdp": 57.9182238579808,
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 4.50246560191663,
-      "gdpGrowthPctYear": "2025",
-      "gdpRank": 16
+      "gdpGrowthPctYear": "2025"
     },
     "TWN": {
       "name": "Taiwan",
@@ -279,7 +270,7 @@
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 1.30007790958307,
       "gdpGrowthPctYear": "2025",
-      "gdpRank": 17
+      "gdpRank": 16
     }
   }
 }
