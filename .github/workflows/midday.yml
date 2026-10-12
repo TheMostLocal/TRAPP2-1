@@ -75,6 +75,12 @@ jobs:
       - name: Compute Markov transitions
         run: python pipeline/compute_transitions.py
 
+      # z93: is the regime call trustworthy enough to trade on? (margin, stability,
+      # quad agreement, cross-check, 21-session track record). The bot goes
+      # regime-agnostic whenever this says it isn't.
+      - name: Regime certainty
+        run: python pipeline/regime_certainty.py
+
       - name: Commit & push (midday scope only)
         run: |
           git config user.name "github-actions[bot]"
@@ -82,7 +88,7 @@ jobs:
           # SCOPED to this job's outputs. The old step staged ALL of data/ and, if
           # a merge failed, copied this run's whole data/ tree over origin -
           # reverting every other workflow's files (tape, fx, leadership, ...).
-          OWN="data/macro/ data/worldbank_countries.json data/signals.json data/regime_current.json data/regime_history.json"
+          OWN="data/macro/ data/worldbank_countries.json data/signals.json data/regime_current.json data/regime_history.json data/regime_certainty.json data/quad_calls.json"
           for p in $OWN; do git add -A "$p" 2>/dev/null || true; done
           if git diff --staged --quiet; then echo "No changes."; exit 0; fi
           echo "=== files staged ==="; git diff --staged --name-only
