@@ -175,6 +175,84 @@ def parse_rss(raw, kind):
     return items[:30]
 
 
+# ------------------------------------------------ 2b. statement tone (z105) ----
+# A transparent phrase lexicon, not a model: every hit is listed so the score can
+# be checked by reading the statement. tone = (hawkish - dovish) / (hawkish +
+# dovish) in [-1, +1]. The change vs the previous statement (sentences added /
+# removed) is usually more informative than the level - the Fed signals through
+# edits.
+HAWKISH = [
+    "inflation remains elevated", "upside risks to inflation", "further policy firming",
+    "additional policy firming", "raise the target range", "increase the target range", "restrictive",
+    "tight labor market", "labor market remains tight", "strong job gains", "robust", "inflationary pressures",
+    "reduce its holdings", "balance sheet reduction", "inflation has moved up", "inflation expectations have risen",
+    "not yet", "prepared to adjust", "vigilant",
+]
+DOVISH = [
+    "lower the target range", "reduce the target range", "cut", "easing", "downside risks", "has softened",
+    "has moderated", "have moderated", "has slowed", "have slowed", "unemployment rate has moved up",
+    "unemployment has risen", "labor market has cooled", "made progress", "further progress", "accommodative",
+    "slow the pace of", "conclude the reduction", "end the reduction", "reinvest", "support the economy",
+    "weakened", "uncertainty has increased",
+]
+
+
+def _text_from_html(raw):
+    html = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)
+    m = re.search(r'<div[^>]+id="article"[^>]*>(.*?)</div>\s*</div>', html, re.S | re.I)
+    body = m.group(1) if m else html
+    body = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", body, flags=re.S | re.I)
+    txt = unescape(re.sub(r"<[^>]+>", " ", body))
+    return re.sub(r"\s+", " ", txt).strip()
+
+
+def _has(t, phrase):
+    return re.search(r"(?<![a-z])" + re.escape(phrase) + r"(?![a-z])", t) is not None   # whole words ("cut" != "executive")
+
+
+def statement_tone(text):
+    t = (text or "").lower()
+    hits_h = [p for p in HAWKISH if _has(t, p)]
+    hits_d = [p for p in DOVISH if _has(t, p)]
+    n = len(hits_h) + len(hits_d)
+    decision = None
+    m = re.search(r"(raise|lower|maintain|reduce|increase)[^.]{0,40}target range[^.]{0,60}?(\d+(?:[-/ ]\d/\d)?)\s*(?:to|and)\s*(\d+(?:[-/ ]\d/\d)?)\s*percent", t)
+    if m:
+        decision = {"verb": m.group(1), "range": f"{m.group(2)}–{m.group(3)}%"}
+    return {"tone": round((len(hits_h) - len(hits_d)) / n, 2) if n else 0.0,
+            "hawkish": hits_h, "dovish": hits_d, "decision": decision, "chars": len(text or "")}
+
+
+def _sentences(text):
+    return [x.strip() for x in re.split(r"(?<=[.;])\s+", text or "") if len(x.strip()) > 25]
+
+
+def statement_diff(prev, cur, limit=6):
+    """Sentences the Committee added / dropped vs the previous statement."""
+    a, b = _sentences(prev), _sentences(cur)
+    sa, sb = set(a), set(b)
+    return {"added": [x for x in b if x not in sa][:limit], "removed": [x for x in a if x not in sb][:limit]}
+
+
+def statement_analysis(items):
+    """Latest + previous FOMC statements from the monetary feed -> tone + diff."""
+    sts = [i for i in (items or []) if i.get("type") == "statement" and i.get("link")]
+    if not sts:
+        return None
+    cur_txt = _text_from_html(get(sts[0]["link"]))
+    out = {"date": sts[0].get("date"), "title": sts[0].get("title"), "link": sts[0]["link"], **statement_tone(cur_txt)}
+    if len(sts) > 1:
+        try:
+            prev_txt = _text_from_html(get(sts[1]["link"]))
+            pt = statement_tone(prev_txt)
+            out["previous"] = {"date": sts[1].get("date"), "tone": pt["tone"], "decision": pt["decision"]}
+            out["toneChange"] = round(out["tone"] - pt["tone"], 2)
+            out["diff"] = statement_diff(prev_txt, cur_txt)
+        except Exception as e:
+            out["previousError"] = f"{type(e).__name__}: {e}"
+    return out
+
+
 # ---------------------------------------------------------------- 4. NY Fed ----
 def nyfed():
     out = {}
@@ -237,6 +315,17 @@ def main():
             log(f"  ✓ {group}: {len(items)} items · latest: {items[0]['title'][:70]}")
         except Exception as e:
             keep(group, f"{type(e).__name__}: {str(e)[:120]}")
+
+    try:
+        sa = statement_analysis(out.get("monetary"))
+        if not sa:
+            raise RuntimeError("no statement in the feed")
+        out["statement"] = sa
+        out["sources"]["statement"] = {"ok": True}
+        log(f"  ✓ statement tone {sa['tone']:+.2f} ({len(sa['hawkish'])} hawkish / {len(sa['dovish'])} dovish phrases)"
+            + (f", change {sa['toneChange']:+.2f} vs previous" if "toneChange" in sa else ""))
+    except Exception as e:
+        keep("statement", f"{type(e).__name__}: {str(e)[:120]}")
 
     ny = nyfed()
     if all("error" in v for v in ny.values()):
