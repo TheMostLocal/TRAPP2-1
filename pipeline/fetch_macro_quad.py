@@ -189,6 +189,18 @@ def main():
     }
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, separators=(",", ":")))
+    # z109: the FULL official quad history (FRED from 2005) for backtests - e.g.
+    # pattern success by macro quad. knownLagMonths: a month's quad isn't known
+    # until its GDP / CPI print, so consumers should label a date with the quad
+    # from knownLagMonths earlier (no lookahead). Uses today's revised FRED data,
+    # not the first-release vintage - a known, documented limitation.
+    full = build_quad_history(gdp_yoy, cpi_yoy, lookback=len(cpi_yoy))
+    (OUT_DIR / "quad_history_full.json").write_text(json.dumps({
+        "method": "GDPC1 YoY RoC (vs prior quarter) x CPIAUCSL YoY RoC (3 months), monthly on CPI dates",
+        "knownLagMonths": 3, "vintage": "latest revised (not first release)",
+        "rows": [{"date": h["date"], "quad": h["quad"], "growthRoC": h["growthRoC"], "inflationRoC": h["inflationRoC"]} for h in full],
+    }, separators=(",", ":")))
+    log(f"Wrote quad_history_full.json ({len(full)} months, {full[0]['date'] if full else '-'} -> {full[-1]['date'] if full else '-'})")
     c = out["current"]
     log(f"Quad {quad} — {c['label']} · as of {c['asOf']} · "
         f"growth {c['growthYoY']*100:.1f}% ({c['growthDir']}), "
