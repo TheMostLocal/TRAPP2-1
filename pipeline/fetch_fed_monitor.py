@@ -253,6 +253,31 @@ def statement_analysis(items):
     return out
 
 
+def minutes_analysis(items):
+    """z110 - latest FOMC minutes: same phrase lexicon over the full text, plus the
+    'participants' sentences that carry a hawkish or dovish phrase - minutes
+    signal through how MANY officials held a view ('many', 'several', 'a few')."""
+    mins = [i for i in (items or []) if i.get("type") == "minutes" and i.get("link")]
+    if not mins:
+        return None
+    txt = _text_from_html(get(mins[0]["link"]))
+    out = {"date": mins[0].get("date"), "title": mins[0].get("title"), "link": mins[0]["link"], **statement_tone(txt)}
+    out.pop("decision", None)
+    quant = re.compile(r"\b(all|most|many|several|some|a few|a couple of|a number of|a majority of)\s+(participants|members)\b", re.I)
+    picks = []
+    for sent in _sentences(txt):
+        low = sent.lower()
+        if not quant.search(sent):
+            continue
+        h = [p for p in HAWKISH if _has(low, p)]
+        d = [p for p in DOVISH if _has(low, p)]
+        if h or d:
+            picks.append({"text": sent[:320], "lean": "hawkish" if len(h) > len(d) else "dovish" if len(d) > len(h) else "mixed",
+                          "who": quant.search(sent).group(0)})
+    out["participants"] = picks[:8]
+    return out
+
+
 # ---------------------------------------------------------------- 4. NY Fed ----
 def nyfed():
     out = {}
@@ -326,6 +351,16 @@ def main():
             + (f", change {sa['toneChange']:+.2f} vs previous" if "toneChange" in sa else ""))
     except Exception as e:
         keep("statement", f"{type(e).__name__}: {str(e)[:120]}")
+
+    try:
+        mi = minutes_analysis(out.get("monetary"))
+        if not mi:
+            raise RuntimeError("no minutes in the feed")
+        out["minutes"] = mi
+        out["sources"]["minutes"] = {"ok": True}
+        log(f"  ✓ minutes tone {mi['tone']:+.2f} · {len(mi['participants'])} participant sentences with a lean")
+    except Exception as e:
+        keep("minutes", f"{type(e).__name__}: {str(e)[:120]}")
 
     ny = nyfed()
     if all("error" in v for v in ny.values()):
