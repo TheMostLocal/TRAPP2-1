@@ -1,7 +1,7 @@
 {
  "_schema": "valuatio-macro-quad/v1",
  "_description": "Hedgeye-style growth/inflation quad from FRED GDPC1 + CPIAUCSL. quad: 1=Goldilocks 2=Reflation 3=Stagflation 4=Deflation.",
- "generated_at": "2026-10-16T22:33:31+00:00",
+ "generated_at": "2026-10-17T02:25:02+00:00",
  "source": "FRED (GDPC1, CPIAUCSL)",
  "current": {
   "quad": 4,
@@ -239,5 +239,5 @@
   ]
  },
  "_nowcast_note": "current = fresh market nowcast (quad_nowcast.py); history = FRED GDP/CPI monthly; officialLatest = last GDP/CPI print.",
- "nowcast_generated_at": "2026-10-17T00:43:04.399826+00:00"
+ "nowcast_generated_at": "2026-10-17T02:25:49.888625+00:00"
 }
