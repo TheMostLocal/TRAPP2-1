@@ -1,28 +1,28 @@
 {
- "asOf": "2026-10-16",
- "generatedAt": "2026-10-16T18:56:34+00:00",
+ "asOf": "2026-10-17",
+ "generatedAt": "2026-10-17T02:28:47+00:00",
  "regime": "expansion",
  "quadNowcast": 3,
- "quadOfficial": 4,
- "certainty": 0.238,
+ "quadOfficial": null,
+ "certainty": 0.115,
  "threshold": 0.65,
  "dialedIn": false,
  "mode": "regime-agnostic",
  "components": {
   "margin": {
-   "value": 0.113,
-   "score": 0.376,
+   "value": 0.115,
+   "score": 0.383,
    "weight": 0.3
   },
   "stability": {
-   "flips20": 9,
+   "flips20": 8,
    "score": 0.0,
    "weight": 0.25
   },
   "quadAgreement": {
    "nowcast": 3,
-   "official": 4,
-   "score": 0.5,
+   "official": null,
+   "score": 0.0,
    "weight": 0.25
   },
   "crossCheck": {
@@ -41,30 +41,23 @@
   "capped": false
  },
  "quadTrack": {
-  "n": 0,
-  "exactPct": null,
-  "growthAxisPct": null,
-  "inflationAxisPct": null,
+  "n": 1,
+  "exactPct": 100.0,
+  "growthAxisPct": 100.0,
+  "inflationAxisPct": 100.0,
   "minN": 10,
-  "logged": 5,
+  "logged": 6,
   "capped": false
  },
  "why": [
   "classifier picks expansion at 45% vs 34% runner-up",
-  "9 regime flip(s) in the last 20 sessions",
-  "quad nowcast Q3 vs official Q4 (1/2 axes agree)",
+  "8 regime flip(s) in the last 20 sessions",
+  "quad nowcast or official quad missing",
   "market regime family 'up' vs quad growth axis \u2192 0.0",
-  "quad nowcast log started (5 call(s)); judged once official GDP/CPI cover those months",
+  "quad nowcast right 100% of 1 judged call(s) \u2014 fewer than 10, not yet used",
   "track record 71% right over 70 judged calls (naive base rate 67%)"
  ],
  "calls": [
-  {
-   "date": "2026-06-05",
-   "regime": "expansion",
-   "family": "up",
-   "fwd21Pct": 1.06,
-   "correct": true
-  },
   {
    "date": "2026-06-06",
    "regime": "neutral",
@@ -629,6 +622,11 @@
   },
   {
    "date": "2026-10-16",
+   "regime": "expansion",
+   "family": "up"
+  },
+  {
+   "date": "2026-10-17",
    "regime": "expansion",
    "family": "up"
   }
