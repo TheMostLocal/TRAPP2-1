@@ -43,6 +43,13 @@ SERIES = [
     ("DGS10",        "10-Year Treasury",          "daily"),
     ("DGS20",        "20-Year Treasury",          "daily"),
     ("DGS30",        "30-Year Treasury",          "daily"),
+    # z126: TIPS real yields (FRED H.15 inflation-indexed constant maturity) - the real curve in
+    # Data -> Yield curve. Until these land, 5y / 10y real = nominal - breakeven (exact).
+    ("DFII5",        "5-Year TIPS Real Yield",    "daily"),
+    ("DFII7",        "7-Year TIPS Real Yield",    "daily"),
+    ("DFII10",       "10-Year TIPS Real Yield",   "daily"),
+    ("DFII20",       "20-Year TIPS Real Yield",   "daily"),
+    ("DFII30",       "30-Year TIPS Real Yield",   "daily"),
     ("T10Y2Y",       "10Y-2Y Spread",             "daily"),
     ("T10Y3M",       "10Y-3M Spread",             "daily"),
     ("BAMLH0A0HYM2", "High Yield OAS",            "daily"),
