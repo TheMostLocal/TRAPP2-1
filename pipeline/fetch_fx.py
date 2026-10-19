@@ -62,6 +62,15 @@ FX_SYMBOLS = {
     "RUB": ("USDRUB=X", "inverse"),
     "PLN": ("USDPLN=X", "inverse"),
     "TRY": ("USDTRY=X", "inverse"),
+    # z123: every currency the books hold - these used to fall back to a hardcoded June table in the app
+    "EGP": ("USDEGP=X", "inverse"),
+    "HUF": ("USDHUF=X", "inverse"),
+    "CLP": ("USDCLP=X", "inverse"),
+    "PHP": ("USDPHP=X", "inverse"),
+    "CZK": ("USDCZK=X", "inverse"),
+    "COP": ("USDCOP=X", "inverse"),
+    "PEN": ("USDPEN=X", "inverse"),
+    "AED": ("USDAED=X", "inverse"),
 }
 
 def last_close(symbol):
