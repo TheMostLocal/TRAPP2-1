@@ -62,6 +62,13 @@ jobs:
           FED_API_KEY: ${{ secrets.FED_API_KEY }}
         run: python pipeline/fetch_macro.py
 
+      - name: FINRA TRACE corporate-bond breadth (optional - needs FINRA API secrets)
+        env:
+          FINRA_CLIENT_ID: ${{ secrets.FINRA_CLIENT_ID }}
+          FINRA_CLIENT_SECRET: ${{ secrets.FINRA_CLIENT_SECRET }}
+        run: python pipeline/fetch_finra_credit.py
+        continue-on-error: true
+
       - name: Fetch World Bank country data (best-effort)
         run: python pipeline/fetch_worldbank.py
         continue-on-error: true
@@ -88,7 +95,7 @@ jobs:
           # SCOPED to this job's outputs. The old step staged ALL of data/ and, if
           # a merge failed, copied this run's whole data/ tree over origin -
           # reverting every other workflow's files (tape, fx, leadership, ...).
-          OWN="data/macro/ data/worldbank_countries.json data/signals.json data/regime_current.json data/regime_history.json data/regime_certainty.json data/quad_calls.json"
+          OWN="data/macro/ data/credit/ data/worldbank_countries.json data/signals.json data/regime_current.json data/regime_history.json data/regime_certainty.json data/quad_calls.json"
           for p in $OWN; do git add -A "$p" 2>/dev/null || true; done
           if git diff --staged --quiet; then echo "No changes."; exit 0; fi
           echo "=== files staged ==="; git diff --staged --name-only
