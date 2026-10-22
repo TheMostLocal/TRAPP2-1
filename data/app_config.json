@@ -1,4 +1,10 @@
 {
-  "_README": "z142: the key proxy URL (TRAPP2-PROXY on Vercel, project-66nen). Not a secret - the keys live in Vercel environment variables. Leave keyProxy empty to switch the proxy off.",
-  "keyProxy": "https://project-66nen.vercel.app/api/v"
+  "_README": "Public app settings (z142/z143). Not secrets: the vendor keys live in Vercel (TRAPP2-PROXY), pipeline keys in GitHub Actions secrets. Leave keyProxy empty to switch the proxy off.",
+  "keyProxy": "https://project-66nen.vercel.app/api/v",
+  "supabase": {
+    "_README": "Optional. Project URL + ANON / publishable key ONLY (public by design, protected by row-level security). NEVER the service_role / sb_secret key - the app refuses it. Empty = each browser keeps its own setting.",
+    "bot": { "url": "https://otajlsyfgggbumniugyy.supabase.co", "anon": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90YWpsc3lmZ2dnYnVtbml1Z3l5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExMjY5OTAsImV4cCI6MjEwNjcwMjk5MH0.EoEUGCAWMwqShz4V_FoiFu0Gvynw_neEzObftYymgq8" },
+    "portfolio": { "url": "https://gixshznhazbnsnwzmyrr.supabase.co", "anon": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpeHNoem5oYXpibnNud3pteXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExMjcyMjcsImV4cCI6MjEwNjcwMzIyN30.NjC9Zc5Dh73LJemxeMPLSkOalrMx5y4SMwdrtd_0_GQ" },
+    "analytics": { "url": "https://gixshznhazbnsnwzmyrr.supabase.co", "anon": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpeHNoem5oYXpibnNud3pteXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExMjcyMjcsImV4cCI6MjEwNjcwMzIyN30.NjC9Zc5Dh73LJemxeMPLSkOalrMx5y4SMwdrtd_0_GQ" }
+  }
 }
