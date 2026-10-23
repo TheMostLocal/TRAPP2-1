@@ -1,21 +1,21 @@
 {
  "asOf": "2026-10-23",
- "generatedAt": "2026-10-23T04:03:57+00:00",
- "regime": "expansion",
+ "generatedAt": "2026-10-23T17:00:12+00:00",
+ "regime": "neutral",
  "quadNowcast": 3,
  "quadOfficial": null,
- "certainty": 0.2,
+ "certainty": 0.137,
  "threshold": 0.65,
  "dialedIn": false,
  "mode": "regime-agnostic",
  "components": {
   "margin": {
-   "value": 0.2,
-   "score": 0.665,
+   "value": 0.037,
+   "score": 0.124,
    "weight": 0.3
   },
   "stability": {
-   "flips20": 8,
+   "flips20": 9,
    "score": 0.0,
    "weight": 0.25
   },
@@ -26,8 +26,8 @@
    "weight": 0.25
   },
   "crossCheck": {
-   "family": "up",
-   "score": 0.0,
+   "family": "flat",
+   "score": 0.5,
    "weight": 0.2
   }
  },
@@ -50,10 +50,10 @@
   "capped": false
  },
  "why": [
-  "classifier picks expansion at 49% vs 29% runner-up",
-  "8 regime flip(s) in the last 20 sessions",
+  "classifier picks neutral at 43% vs 40% runner-up",
+  "9 regime flip(s) in the last 20 sessions",
   "quad nowcast or official quad missing",
-  "market regime family 'up' vs quad growth axis \u2192 0.0",
+  "market regime family 'flat' vs quad growth axis \u2192 0.5",
   "quad nowcast right 100% of 1 judged call(s) \u2014 fewer than 10, not yet used",
   "track record 70% right over 74 judged calls (naive base rate 66%)"
  ],
@@ -629,8 +629,8 @@
   },
   {
    "date": "2026-10-23",
-   "regime": "expansion",
-   "family": "up"
+   "regime": "neutral",
+   "family": "flat"
   }
  ]
 }
