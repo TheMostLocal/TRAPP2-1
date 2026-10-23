@@ -10,10 +10,15 @@ name: Fed Monitor (QE/QT + FOMC + NY Fed)
 #   21:00 Thu       after the H.4.1 release (4:30pm ET)
 on:
   schedule:
-    - cron: '0 13 * * 1-5'
-    - cron: '45 18 * * 1-5'
-    - cron: '45 19 * * 1-5'
-    - cron: '0 21 * * 4'
+    # z147: kept to Eastern time all year - 0900 ET weekdays, 1445 ET (after a 1400 FOMC statement) and
+    # 1700 ET Thursdays (after the 1630 ET H.4.1 balance-sheet release; in winter the old 21:00 UTC run
+    # landed at 1600, before the release).
+    - cron: '0 13 * * 1-5'     # 0900 EDT
+    - cron: '0 14 * * 1-5'     # 0900 EST
+    - cron: '45 18 * * 1-5'    # 1445 EDT
+    - cron: '45 19 * * 1-5'    # 1445 EST
+    - cron: '0 21 * * 4'       # 1700 EDT Thu
+    - cron: '0 22 * * 4'       # 1700 EST Thu
   workflow_dispatch:
 
 concurrency:
@@ -21,7 +26,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  gate:
+    # z147: GitHub cron runs on UTC. Each Eastern time is listed for EDT (UTC-4) and EST (UTC-5);
+    # this job keeps only the run that lands on the intended ET time (the other one skips in seconds).
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.g.outputs.run }}
+    steps:
+      - id: g
+        name: Eastern-time gate
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          S="${{ github.event.schedule }}"
+          OFF=$(TZ=America/New_York date +%z); OFFH=$((10#${OFF:1:2}))
+          UM=$(echo "$S" | awk '{print $1}'); UH=$(echo "$S" | awk '{print $2}')
+          ETH=$(( (10#$UH - OFFH + 24) % 24 )); ETM=$(printf '%02d' "$UM")
+          case " 9:00 14:45 17:00 " in *" ${ETH}:${ETM} "*) RUN=true ;; *) RUN=false ;; esac
+          echo "schedule '$S' = ${ETH}:${ETM} ET today (UTC${OFF}) -> run=${RUN}"
+          echo "run=${RUN}" >> "$GITHUB_OUTPUT"
+
   monitor:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
