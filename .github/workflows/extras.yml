@@ -1,0 +1,63 @@
+# ============================================================
+#  >>> DESTINATION: TheMostLocal/TRAPP2-1
+#  >>> FILE PATH:   .github/workflows/extras.yml
+#  z158 - CBOE volatility (VIX term structure, SKEW), Treasury auctions + debt, BLS, GDELT news tone, and the
+#  FX / crypto cross-checks. Weekdays 0725 ET (BLS releases land 0830 - the 1820 run picks them up; GDELT
+#  overnight) and 1820 ET (CBOE's closes are posted after 1700). ET-gated twin crons. BLS_API_KEY optional.
+# ============================================================
+name: Market extras (CBOE, Treasury, BLS, GDELT, cross-checks)
+
+on:
+  schedule:
+    - cron: '25 11 * * 1-5'    # 0725 EDT
+    - cron: '25 12 * * 1-5'    # 0725 EST
+    - cron: '20 22 * * 1-5'    # 1820 EDT
+    - cron: '20 23 * * 1-5'    # 1820 EST
+  workflow_dispatch:
+
+concurrency:
+  group: trapp2-1-extras
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.g.outputs.run }}
+    steps:
+      - id: g
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          S="${{ github.event.schedule }}"; OFF=$(TZ=America/New_York date +%z); OFFH=$((10#${OFF:1:2}))
+          UM=$(echo "$S" | awk '{print $1}'); UH=$(echo "$S" | awk '{print $2}')
+          ETH=$(( (10#$UH - OFFH + 24) % 24 )); ETM=$(printf '%02d' "$UM")
+          case " 7:25 18:20 " in *" ${ETH}:${ETM} "*) RUN=true ;; *) RUN=false ;; esac
+          echo "schedule '$S' = ${ETH}:${ETM} ET -> run=${RUN}"; echo "run=${RUN}" >> "$GITHUB_OUTPUT"
+
+  extras:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Extras
+        env:
+          BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
+        run: python pipeline/fetch_market_extras.py
+      - name: Commit & push
+        run: |
+          git config user.name "valuatio-extras"; git config user.email "actions@github.com"
+          [ -e data/extras ] && git add -A data/extras
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -q -m "extras: $(TZ=America/New_York date +%Y-%m-%d\ %H%M) ET [skip ci]"
+          for k in 1 2 3 4 5; do
+            if git push -q origin HEAD:main; then echo "pushed (attempt $k)"; exit 0; fi
+            git fetch -q origin main; git merge -X ours origin/main --no-edit -q || true; sleep $((k * 3))
+          done
+          echo "::warning::push failed after 5 attempts"
