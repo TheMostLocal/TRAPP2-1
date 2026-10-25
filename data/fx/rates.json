@@ -1,7 +1,7 @@
 {
   "_schema": "valuatio-fx-rates-v1",
   "_description": "USD-anchored FX rates, one convention per currency.",
-  "updatedAt": "2026-10-25T20:17:05.150620Z",
+  "updatedAt": "2026-10-25T20:32:05.185059Z",
   "base": "USD",
   "source": "fetch_fx.py (yfinance)",
   "rates": {
@@ -11,8 +11,8 @@
       "pair": "EURUSD=X"
     },
     "GBP": {
-      "usdPer": 1.33822238,
-      "perUsd": 0.74726,
+      "usdPer": 1.33815062,
+      "perUsd": 0.7473,
       "pair": "GBPUSD=X"
     },
     "AUD": {
@@ -56,8 +56,8 @@
       "pair": "USDINR=X"
     },
     "CAD": {
-      "usdPer": 0.71286001,
-      "perUsd": 1.4028,
+      "usdPer": 0.71220002,
+      "perUsd": 1.4041,
       "pair": "USDCAD=X"
     },
     "CHF": {
@@ -131,8 +131,8 @@
       "pair": "USDRUB=X"
     },
     "PLN": {
-      "usdPer": 0.25493295,
-      "perUsd": 3.9226,
+      "usdPer": 0.25493946,
+      "perUsd": 3.9225,
       "pair": "USDPLN=X"
     },
     "TRY": {
@@ -146,8 +146,8 @@
       "pair": "USDEGP=X"
     },
     "HUF": {
-      "usdPer": 0.0030672,
-      "perUsd": 326.029999,
+      "usdPer": 0.00306748,
+      "perUsd": 326.0,
       "pair": "USDHUF=X"
     },
     "CLP": {
