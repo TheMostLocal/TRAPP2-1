@@ -1,38 +1,38 @@
 {
   "_schema": "valuatio-fx-rates-v1",
   "_description": "USD-anchored FX rates, one convention per currency.",
-  "updatedAt": "2026-10-25T22:17:05.422127Z",
+  "updatedAt": "2026-10-25T22:32:04.498722Z",
   "base": "USD",
   "source": "fetch_fx.py (yfinance)",
   "rates": {
     "EUR": {
-      "usdPer": 1.12157917,
-      "perUsd": 0.8916,
+      "usdPer": 1.12132764,
+      "perUsd": 0.8918,
       "pair": "EURUSD=X"
     },
     "GBP": {
-      "usdPer": 1.33704138,
-      "perUsd": 0.74792,
+      "usdPer": 1.33722019,
+      "perUsd": 0.74782,
       "pair": "GBPUSD=X"
     },
     "AUD": {
-      "usdPer": 0.70372975,
-      "perUsd": 1.421,
+      "usdPer": 0.70397747,
+      "perUsd": 1.4205,
       "pair": "AUDUSD=X"
     },
     "NZD": {
-      "usdPer": 0.57038558,
-      "perUsd": 1.7532,
+      "usdPer": 0.57074368,
+      "perUsd": 1.7521,
       "pair": "NZDUSD=X"
     },
     "JPY": {
-      "usdPer": 0.00637324,
-      "perUsd": 156.906006,
+      "usdPer": 0.00637381,
+      "perUsd": 156.891998,
       "pair": "USDJPY=X"
     },
     "KRW": {
-      "usdPer": 0.00075554,
-      "perUsd": 1323.560059,
+      "usdPer": 0.00075565,
+      "perUsd": 1323.359985,
       "pair": "USDKRW=X"
     },
     "CNY": {
@@ -41,13 +41,13 @@
       "pair": "USDCNY=X"
     },
     "HKD": {
-      "usdPer": 0.12751345,
-      "perUsd": 7.84231,
+      "usdPer": 0.12751524,
+      "perUsd": 7.8422,
       "pair": "USDHKD=X"
     },
     "TWD": {
-      "usdPer": 0.03073613,
-      "perUsd": 32.535,
+      "usdPer": 0.03071442,
+      "perUsd": 32.557999,
       "pair": "USDTWD=X"
     },
     "INR": {
@@ -56,33 +56,33 @@
       "pair": "USDINR=X"
     },
     "CAD": {
-      "usdPer": 0.71397975,
-      "perUsd": 1.4006,
+      "usdPer": 0.71369437,
+      "perUsd": 1.40116,
       "pair": "USDCAD=X"
     },
     "CHF": {
-      "usdPer": 1.21225348,
-      "perUsd": 0.82491,
+      "usdPer": 1.21220933,
+      "perUsd": 0.82494,
       "pair": "USDCHF=X"
     },
     "SGD": {
-      "usdPer": 0.78277271,
-      "perUsd": 1.27751,
+      "usdPer": 0.78270537,
+      "perUsd": 1.27762,
       "pair": "USDSGD=X"
     },
     "SEK": {
-      "usdPer": 0.10091143,
-      "perUsd": 9.90968,
+      "usdPer": 0.10089361,
+      "perUsd": 9.91143,
       "pair": "USDSEK=X"
     },
     "NOK": {
-      "usdPer": 0.1074564,
-      "perUsd": 9.3061,
+      "usdPer": 0.10745339,
+      "perUsd": 9.30636,
       "pair": "USDNOK=X"
     },
     "DKK": {
-      "usdPer": 0.15004944,
-      "perUsd": 6.66447,
+      "usdPer": 0.15001162,
+      "perUsd": 6.66615,
       "pair": "USDDKK=X"
     },
     "BRL": {
@@ -91,13 +91,13 @@
       "pair": "USDBRL=X"
     },
     "MXN": {
-      "usdPer": 0.05363368,
-      "perUsd": 18.645,
+      "usdPer": 0.05356473,
+      "perUsd": 18.669001,
       "pair": "USDMXN=X"
     },
     "ZAR": {
-      "usdPer": 0.06035294,
-      "perUsd": 16.569201,
+      "usdPer": 0.06036169,
+      "perUsd": 16.566799,
       "pair": "USDZAR=X"
     },
     "SAR": {
@@ -131,13 +131,13 @@
       "pair": "USDRUB=X"
     },
     "PLN": {
-      "usdPer": 0.25553228,
-      "perUsd": 3.9134,
+      "usdPer": 0.25512807,
+      "perUsd": 3.9196,
       "pair": "USDPLN=X"
     },
     "TRY": {
-      "usdPer": 0.02010329,
-      "perUsd": 49.743099,
+      "usdPer": 0.02010462,
+      "perUsd": 49.739799,
       "pair": "USDTRY=X"
     },
     "EGP": {
@@ -146,8 +146,8 @@
       "pair": "USDEGP=X"
     },
     "HUF": {
-      "usdPer": 0.00306419,
-      "perUsd": 326.350006,
+      "usdPer": 0.00306326,
+      "perUsd": 326.450012,
       "pair": "USDHUF=X"
     },
     "CLP": {
@@ -161,8 +161,8 @@
       "pair": "USDPHP=X"
     },
     "CZK": {
-      "usdPer": 0.04622354,
-      "perUsd": 21.634001,
+      "usdPer": 0.04619151,
+      "perUsd": 21.649,
       "pair": "USDCZK=X"
     },
     "COP": {
@@ -176,8 +176,8 @@
       "pair": "USDPEN=X"
     },
     "AED": {
-      "usdPer": 0.27227925,
-      "perUsd": 3.6727,
+      "usdPer": 0.27228666,
+      "perUsd": 3.6726,
       "pair": "USDAED=X"
     }
   }
