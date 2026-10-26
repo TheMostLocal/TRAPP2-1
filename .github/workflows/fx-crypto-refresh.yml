@@ -21,6 +21,7 @@ concurrency:
 
 permissions:
   contents: write
+  actions: write          # z161: the loop queues its own next run
 
 jobs:
   refresh:
@@ -38,4 +39,5 @@ jobs:
       - name: FX + crypto every 15 minutes (:02 / :17 / :32 / :47)
         env:
           LOOP_BUDGET_MIN: '170'
+          GH_TOKEN: ${{ github.token }}
         run: bash pipeline/fx_crypto_loop.sh
