@@ -1,7 +1,7 @@
 {
   "_schema": "valuatio-fx-rates-v1",
   "_description": "USD-anchored FX rates, one convention per currency.",
-  "updatedAt": "2026-10-26T20:32:05.593326Z",
+  "updatedAt": "2026-10-26T20:47:06.141746Z",
   "base": "USD",
   "source": "fetch_fx.py (yfinance)",
   "rates": {
@@ -11,8 +11,8 @@
       "pair": "EURUSD=X"
     },
     "GBP": {
-      "usdPer": 1.3342762,
-      "perUsd": 0.74947,
+      "usdPer": 1.33424056,
+      "perUsd": 0.74949,
       "pair": "GBPUSD=X"
     },
     "AUD": {
@@ -21,18 +21,18 @@
       "pair": "AUDUSD=X"
     },
     "NZD": {
-      "usdPer": 0.56824642,
-      "perUsd": 1.7598,
+      "usdPer": 0.56831098,
+      "perUsd": 1.7596,
       "pair": "NZDUSD=X"
     },
     "JPY": {
-      "usdPer": 0.00634836,
-      "perUsd": 157.520996,
+      "usdPer": 0.00634953,
+      "perUsd": 157.492004,
       "pair": "USDJPY=X"
     },
     "KRW": {
-      "usdPer": 0.00075451,
-      "perUsd": 1325.359985,
+      "usdPer": 0.00075446,
+      "perUsd": 1325.449951,
       "pair": "USDKRW=X"
     },
     "CNY": {
@@ -41,13 +41,13 @@
       "pair": "USDCNY=X"
     },
     "HKD": {
-      "usdPer": 0.12746452,
-      "perUsd": 7.84532,
+      "usdPer": 0.12746582,
+      "perUsd": 7.84524,
       "pair": "USDHKD=X"
     },
     "TWD": {
-      "usdPer": 0.03070027,
-      "perUsd": 32.573002,
+      "usdPer": 0.03069933,
+      "perUsd": 32.574001,
       "pair": "USDTWD=X"
     },
     "INR": {
@@ -56,58 +56,58 @@
       "pair": "USDINR=X"
     },
     "CAD": {
-      "usdPer": 0.71321591,
-      "perUsd": 1.4021,
+      "usdPer": 0.71364853,
+      "perUsd": 1.40125,
       "pair": "USDCAD=X"
     },
     "CHF": {
-      "usdPer": 1.20797746,
-      "perUsd": 0.82783,
+      "usdPer": 1.20807966,
+      "perUsd": 0.82776,
       "pair": "USDCHF=X"
     },
     "SGD": {
-      "usdPer": 0.78078638,
-      "perUsd": 1.28076,
+      "usdPer": 0.7808108,
+      "perUsd": 1.28072,
       "pair": "USDSGD=X"
     },
     "SEK": {
-      "usdPer": 0.10044416,
-      "perUsd": 9.95578,
+      "usdPer": 0.10045446,
+      "perUsd": 9.95476,
       "pair": "USDSEK=X"
     },
     "NOK": {
-      "usdPer": 0.10726046,
-      "perUsd": 9.3231,
+      "usdPer": 0.10727346,
+      "perUsd": 9.32197,
       "pair": "USDNOK=X"
     },
     "DKK": {
-      "usdPer": 0.14951997,
-      "perUsd": 6.68807,
+      "usdPer": 0.14953047,
+      "perUsd": 6.6876,
       "pair": "USDDKK=X"
     },
     "BRL": {
-      "usdPer": 0.1846347,
-      "perUsd": 5.4161,
+      "usdPer": 0.18509264,
+      "perUsd": 5.4027,
       "pair": "USDBRL=X"
     },
     "MXN": {
-      "usdPer": 0.05387641,
-      "perUsd": 18.561001,
+      "usdPer": 0.0538677,
+      "perUsd": 18.563999,
       "pair": "USDMXN=X"
     },
     "ZAR": {
-      "usdPer": 0.06006114,
-      "perUsd": 16.6497,
+      "usdPer": 0.06008099,
+      "perUsd": 16.644199,
       "pair": "USDZAR=X"
     },
     "SAR": {
-      "usdPer": 0.26648191,
-      "perUsd": 3.7526,
+      "usdPer": 0.26652451,
+      "perUsd": 3.752,
       "pair": "USDSAR=X"
     },
     "ILS": {
-      "usdPer": 0.32464369,
-      "perUsd": 3.0803,
+      "usdPer": 0.32465425,
+      "perUsd": 3.0802,
       "pair": "USDILS=X"
     },
     "THB": {
@@ -131,13 +131,13 @@
       "pair": "USDRUB=X"
     },
     "PLN": {
-      "usdPer": 0.25379744,
-      "perUsd": 3.94015,
+      "usdPer": 0.25381934,
+      "perUsd": 3.93981,
       "pair": "USDPLN=X"
     },
     "TRY": {
-      "usdPer": 0.02009751,
-      "perUsd": 49.757401,
+      "usdPer": 0.020098,
+      "perUsd": 49.756199,
       "pair": "USDTRY=X"
     },
     "EGP": {
@@ -146,8 +146,8 @@
       "pair": "USDEGP=X"
     },
     "HUF": {
-      "usdPer": 0.00304349,
-      "perUsd": 328.570007,
+      "usdPer": 0.00304383,
+      "perUsd": 328.53299,
       "pair": "USDHUF=X"
     },
     "CLP": {
@@ -161,8 +161,8 @@
       "pair": "USDPHP=X"
     },
     "CZK": {
-      "usdPer": 0.04590146,
-      "perUsd": 21.785801,
+      "usdPer": 0.04592633,
+      "perUsd": 21.774,
       "pair": "USDCZK=X"
     },
     "COP": {
