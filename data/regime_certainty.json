@@ -1,10 +1,10 @@
 {
  "asOf": "2026-10-27",
- "generatedAt": "2026-10-27T17:56:26+00:00",
+ "generatedAt": "2026-10-27T20:14:21+00:00",
  "regime": "neutral",
  "quadNowcast": 3,
- "quadOfficial": 3,
- "certainty": 0.392,
+ "quadOfficial": null,
+ "certainty": 0.142,
  "threshold": 0.65,
  "dialedIn": false,
  "mode": "regime-agnostic",
@@ -21,8 +21,8 @@
   },
   "quadAgreement": {
    "nowcast": 3,
-   "official": 3,
-   "score": 1.0,
+   "official": null,
+   "score": 0.0,
    "weight": 0.25
   },
   "crossCheck": {
@@ -52,7 +52,7 @@
  "why": [
   "classifier picks neutral at 43% vs 39% runner-up",
   "8 regime flip(s) in the last 20 sessions",
-  "quad nowcast Q3 vs official Q3 (2/2 axes agree)",
+  "quad nowcast or official quad missing",
   "market regime family 'flat' vs quad growth axis \u2192 0.5",
   "quad nowcast right 100% of 1 judged call(s) \u2014 fewer than 10, not yet used",
   "track record 71% right over 76 judged calls (naive base rate 64%)"
