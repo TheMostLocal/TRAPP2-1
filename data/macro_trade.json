@@ -1,7 +1,7 @@
 {
   "_schema": "valuatio-macro-trade-v1",
   "_description": "US trade-balance series from FRED. Monthly cadence; US monthly trade data publishes ~5 weeks after month-end.",
-  "updatedAt": "2026-10-28T19:01:17.856695Z",
+  "updatedAt": "2026-10-29T19:08:38.665518Z",
   "source": "FRED (api.stlouisfed.org)",
   "series": {
     "BOPGSTB": {
@@ -794,16 +794,12 @@
       "units": "USD billions",
       "cadence": "quarterly",
       "latest": {
-        "date": "2026-04-01",
-        "value": 3794.645
+        "date": "2026-07-01",
+        "value": 3752.076
       },
-      "prevValue": 3547.32,
-      "changePct": 6.97,
+      "prevValue": 3794.645,
+      "changePct": -1.12,
       "history": [
-        {
-          "date": "2017-07-01",
-          "value": 2384.524
-        },
         {
           "date": "2017-10-01",
           "value": 2479.107
@@ -943,6 +939,10 @@
         {
           "date": "2026-04-01",
           "value": 3794.645
+        },
+        {
+          "date": "2026-07-01",
+          "value": 3752.076
         }
       ]
     },
@@ -951,16 +951,12 @@
       "units": "USD billions",
       "cadence": "quarterly",
       "latest": {
-        "date": "2026-04-01",
-        "value": 4674.908
+        "date": "2026-07-01",
+        "value": 4969.165
       },
-      "prevValue": 4368.106,
-      "changePct": 7.02,
+      "prevValue": 4674.908,
+      "changePct": 6.29,
       "history": [
-        {
-          "date": "2017-07-01",
-          "value": 2916.022
-        },
         {
           "date": "2017-10-01",
           "value": 3034.004
@@ -1100,6 +1096,10 @@
         {
           "date": "2026-04-01",
           "value": 4674.908
+        },
+        {
+          "date": "2026-07-01",
+          "value": 4969.165
         }
       ]
     }
