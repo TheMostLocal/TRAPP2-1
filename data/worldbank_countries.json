@@ -1,7 +1,7 @@
 {
   "_schema": "valuatio-worldbank-v1",
   "_description": "Annual GDP + trade composition from the World Bank (free API, no key). Data is typically 6-18 months lagged.",
-  "updatedAt": "2026-10-29T18:26:42.266342Z",
+  "updatedAt": "2026-10-29T19:12:19.943067Z",
   "source": "World Bank (api.worldbank.org)",
   "countries": {
     "USA": {
@@ -160,8 +160,6 @@
       "importsPctGdpYear": "2025",
       "tradePctGdp": 63.5105049692227,
       "tradePctGdpYear": "2025",
-      "gdpGrowthPct": 1.74268536175708,
-      "gdpGrowthPctYear": "2025",
       "gdpRank": 9
     },
     "KOR": {
@@ -192,16 +190,12 @@
       "importsPctGdpYear": "2025",
       "tradePctGdp": 79.9239525815655,
       "tradePctGdpYear": "2025",
-      "gdpGrowthPct": 0.561683456144578,
-      "gdpGrowthPctYear": "2025",
       "gdpRank": 13
     },
     "AUS": {
       "name": "Australia",
       "etf": "EWA",
       "iso3": "AUS",
-      "gdpUsd": 1798518933689.21,
-      "gdpUsdYear": "2025",
       "exportsPctGdp": 23.2444383508997,
       "exportsPctGdpYear": "2025",
       "importsPctGdp": 22.6570110371129,
@@ -209,8 +203,7 @@
       "tradePctGdp": 45.9014493880126,
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 1.35039785076631,
-      "gdpGrowthPctYear": "2025",
-      "gdpRank": 14
+      "gdpGrowthPctYear": "2025"
     },
     "ESP": {
       "name": "Spain",
@@ -220,8 +213,6 @@
       "gdpUsdYear": "2025",
       "exportsPctGdp": 36.6374813887545,
       "exportsPctGdpYear": "2025",
-      "importsPctGdp": 32.8133446186236,
-      "importsPctGdpYear": "2025",
       "tradePctGdp": 69.4508260073781,
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 2.82495400578509,
@@ -242,14 +233,12 @@
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 5.10808904438025,
       "gdpGrowthPctYear": "2025",
-      "gdpRank": 15
+      "gdpRank": 14
     },
     "SAU": {
       "name": "Saudi Arabia",
       "etf": "KSA",
       "iso3": "SAU",
-      "gdpUsd": 1276942933333.33,
-      "gdpUsdYear": "2025",
       "exportsPctGdp": 29.7448740074211,
       "exportsPctGdpYear": "2025",
       "importsPctGdp": 28.1733498505598,
@@ -257,8 +246,7 @@
       "tradePctGdp": 57.9182238579808,
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 4.50246560191663,
-      "gdpGrowthPctYear": "2025",
-      "gdpRank": 16
+      "gdpGrowthPctYear": "2025"
     },
     "TWN": {
       "name": "Taiwan",
@@ -269,6 +257,8 @@
       "name": "Switzerland",
       "etf": "EWL",
       "iso3": "CHE",
+      "gdpUsd": 1043529899250.92,
+      "gdpUsdYear": "2025",
       "exportsPctGdp": 78.0527434720482,
       "exportsPctGdpYear": "2025",
       "importsPctGdp": 69.109307845911,
@@ -276,7 +266,8 @@
       "tradePctGdp": 147.162051317959,
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 1.30007790958307,
-      "gdpGrowthPctYear": "2025"
+      "gdpGrowthPctYear": "2025",
+      "gdpRank": 15
     }
   }
 }
