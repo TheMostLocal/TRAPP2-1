@@ -1,10 +1,10 @@
 {
  "asOf": "2026-10-30",
- "generatedAt": "2026-10-30T17:59:08+00:00",
+ "generatedAt": "2026-10-30T20:02:21+00:00",
  "regime": "expansion",
- "quadNowcast": 4,
- "quadOfficial": 3,
- "certainty": 0.424,
+ "quadNowcast": 3,
+ "quadOfficial": null,
+ "certainty": 0.299,
  "threshold": 0.65,
  "dialedIn": false,
  "mode": "regime-agnostic",
@@ -20,9 +20,9 @@
    "weight": 0.25
   },
   "quadAgreement": {
-   "nowcast": 4,
-   "official": 3,
-   "score": 0.5,
+   "nowcast": 3,
+   "official": null,
+   "score": 0.0,
    "weight": 0.25
   },
   "crossCheck": {
@@ -52,7 +52,7 @@
  "why": [
   "classifier picks expansion at 53% vs 23% runner-up",
   "8 regime flip(s) in the last 20 sessions",
-  "quad nowcast Q4 vs official Q3 (1/2 axes agree)",
+  "quad nowcast or official quad missing",
   "market regime family 'up' vs quad growth axis \u2192 0.0",
   "quad nowcast right 100% of 1 judged call(s) \u2014 fewer than 10, not yet used",
   "track record 72% right over 79 judged calls (naive base rate 66%)"
