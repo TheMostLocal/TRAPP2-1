@@ -1,7 +1,7 @@
 {
   "_schema": "valuatio-fx-rates-v1",
   "_description": "USD-anchored FX rates, one convention per currency.",
-  "updatedAt": "2026-10-30T15:47:03.903806Z",
+  "updatedAt": "2026-10-30T15:47:38.226774Z",
   "base": "USD",
   "source": "fetch_fx.py (yfinance)",
   "rates": {
@@ -26,13 +26,13 @@
       "pair": "NZDUSD=X"
     },
     "JPY": {
-      "usdPer": 0.00635987,
-      "perUsd": 157.235992,
+      "usdPer": 0.00635821,
+      "perUsd": 157.276993,
       "pair": "USDJPY=X"
     },
     "KRW": {
-      "usdPer": 0.00075003,
-      "perUsd": 1333.280029,
+      "usdPer": 0.00074972,
+      "perUsd": 1333.829956,
       "pair": "USDKRW=X"
     },
     "CNY": {
@@ -41,8 +41,8 @@
       "pair": "USDCNY=X"
     },
     "HKD": {
-      "usdPer": 0.1274746,
-      "perUsd": 7.8447,
+      "usdPer": 0.12747948,
+      "perUsd": 7.8444,
       "pair": "USDHKD=X"
     },
     "TWD": {
@@ -56,48 +56,48 @@
       "pair": "USDINR=X"
     },
     "CAD": {
-      "usdPer": 0.71711834,
-      "perUsd": 1.39447,
+      "usdPer": 0.71696407,
+      "perUsd": 1.39477,
       "pair": "USDCAD=X"
     },
     "CHF": {
-      "usdPer": 1.21381323,
-      "perUsd": 0.82385,
+      "usdPer": 1.21357748,
+      "perUsd": 0.82401,
       "pair": "USDCHF=X"
     },
     "SGD": {
-      "usdPer": 0.78263797,
-      "perUsd": 1.27773,
+      "usdPer": 0.78253386,
+      "perUsd": 1.2779,
       "pair": "USDSGD=X"
     },
     "SEK": {
-      "usdPer": 0.10172816,
-      "perUsd": 9.83012,
+      "usdPer": 0.10168967,
+      "perUsd": 9.83384,
       "pair": "USDSEK=X"
     },
     "NOK": {
-      "usdPer": 0.10849588,
-      "perUsd": 9.21694,
+      "usdPer": 0.10844693,
+      "perUsd": 9.2211,
       "pair": "USDNOK=X"
     },
     "DKK": {
-      "usdPer": 0.14933063,
-      "perUsd": 6.69655,
+      "usdPer": 0.14928961,
+      "perUsd": 6.69839,
       "pair": "USDDKK=X"
     },
     "BRL": {
-      "usdPer": 0.1843216,
-      "perUsd": 5.4253,
+      "usdPer": 0.18422314,
+      "perUsd": 5.4282,
       "pair": "USDBRL=X"
     },
     "MXN": {
-      "usdPer": 0.05316197,
-      "perUsd": 18.81044,
+      "usdPer": 0.05314767,
+      "perUsd": 18.8155,
       "pair": "USDMXN=X"
     },
     "ZAR": {
-      "usdPer": 0.05987909,
-      "perUsd": 16.700319,
+      "usdPer": 0.05985444,
+      "perUsd": 16.707199,
       "pair": "USDZAR=X"
     },
     "SAR": {
@@ -106,13 +106,13 @@
       "pair": "USDSAR=X"
     },
     "ILS": {
-      "usdPer": 0.3189701,
-      "perUsd": 3.13509,
+      "usdPer": 0.31893653,
+      "perUsd": 3.13542,
       "pair": "USDILS=X"
     },
     "THB": {
-      "usdPer": 0.02965599,
-      "perUsd": 33.720001,
+      "usdPer": 0.0296472,
+      "perUsd": 33.73,
       "pair": "USDTHB=X"
     },
     "IDR": {
@@ -131,13 +131,13 @@
       "pair": "USDRUB=X"
     },
     "PLN": {
-      "usdPer": 0.25348863,
-      "perUsd": 3.94495,
+      "usdPer": 0.25341155,
+      "perUsd": 3.94615,
       "pair": "USDPLN=X"
     },
     "TRY": {
-      "usdPer": 0.02002347,
-      "perUsd": 49.941399,
+      "usdPer": 0.02002343,
+      "perUsd": 49.941502,
       "pair": "USDTRY=X"
     },
     "EGP": {
@@ -146,13 +146,13 @@
       "pair": "USDEGP=X"
     },
     "HUF": {
-      "usdPer": 0.00305213,
-      "perUsd": 327.640015,
+      "usdPer": 0.00305101,
+      "perUsd": 327.76001,
       "pair": "USDHUF=X"
     },
     "CLP": {
-      "usdPer": 0.00101074,
-      "perUsd": 989.369995,
+      "usdPer": 0.00101049,
+      "perUsd": 989.619995,
       "pair": "USDCLP=X"
     },
     "PHP": {
@@ -161,18 +161,18 @@
       "pair": "USDPHP=X"
     },
     "CZK": {
-      "usdPer": 0.04585578,
-      "perUsd": 21.807501,
+      "usdPer": 0.04584296,
+      "perUsd": 21.813601,
       "pair": "USDCZK=X"
     },
     "COP": {
-      "usdPer": 0.00031504,
-      "perUsd": 3174.22998,
+      "usdPer": 0.0003149,
+      "perUsd": 3175.570068,
       "pair": "USDCOP=X"
     },
     "PEN": {
-      "usdPer": 0.28910089,
-      "perUsd": 3.459,
+      "usdPer": 0.28910926,
+      "perUsd": 3.4589,
       "pair": "USDPEN=X"
     },
     "AED": {
