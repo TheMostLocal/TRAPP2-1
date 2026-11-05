@@ -1,33 +1,33 @@
 {
- "asOf": "2026-11-04",
- "generatedAt": "2026-11-04T22:05:11+00:00",
- "regime": "neutral",
- "quadNowcast": 3,
- "quadOfficial": null,
- "certainty": 0.217,
+ "asOf": "2026-11-05",
+ "generatedAt": "2026-11-05T20:39:34+00:00",
+ "regime": "expansion",
+ "quadNowcast": 4,
+ "quadOfficial": 3,
+ "certainty": 0.272,
  "threshold": 0.65,
  "dialedIn": false,
  "mode": "regime-agnostic",
  "components": {
   "margin": {
-   "value": 0.117,
-   "score": 0.391,
+   "value": 0.147,
+   "score": 0.491,
    "weight": 0.3
   },
   "stability": {
-   "flips20": 7,
+   "flips20": 8,
    "score": 0.0,
    "weight": 0.25
   },
   "quadAgreement": {
-   "nowcast": 3,
-   "official": null,
-   "score": 0.0,
+   "nowcast": 4,
+   "official": 3,
+   "score": 0.5,
    "weight": 0.25
   },
   "crossCheck": {
-   "family": "flat",
-   "score": 0.5,
+   "family": "up",
+   "score": 0.0,
    "weight": 0.2
   }
  },
@@ -46,25 +46,18 @@
   "growthAxisPct": 100.0,
   "inflationAxisPct": 100.0,
   "minN": 10,
-  "logged": 18,
+  "logged": 19,
   "capped": false
  },
  "why": [
-  "classifier picks neutral at 48% vs 36% runner-up",
-  "7 regime flip(s) in the last 20 sessions",
-  "quad nowcast or official quad missing",
-  "market regime family 'flat' vs quad growth axis \u2192 0.5",
+  "classifier picks expansion at 47% vs 32% runner-up",
+  "8 regime flip(s) in the last 20 sessions",
+  "quad nowcast Q4 vs official Q3 (1/2 axes agree)",
+  "market regime family 'up' vs quad growth axis \u2192 0.0",
   "quad nowcast right 100% of 1 judged call(s) \u2014 fewer than 10, not yet used",
   "track record 72% right over 82 judged calls (naive base rate 63%)"
  ],
  "calls": [
-  {
-   "date": "2026-07-02",
-   "regime": "neutral",
-   "family": "flat",
-   "fwd21Pct": 1.73,
-   "correct": true
-  },
   {
    "date": "2026-07-03",
    "regime": "expansion",
@@ -631,6 +624,11 @@
    "date": "2026-11-04",
    "regime": "neutral",
    "family": "flat"
+  },
+  {
+   "date": "2026-11-05",
+   "regime": "expansion",
+   "family": "up"
   }
  ]
 }
