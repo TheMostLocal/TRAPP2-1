@@ -1,38 +1,38 @@
 {
   "_schema": "valuatio-fx-rates-v1",
   "_description": "USD-anchored FX rates, one convention per currency.",
-  "updatedAt": "2026-11-06T21:32:05.180989Z",
+  "updatedAt": "2026-11-06T21:47:05.572139Z",
   "base": "USD",
   "source": "fetch_fx.py (yfinance)",
   "rates": {
     "EUR": {
-      "usdPer": 1.11445451,
-      "perUsd": 0.8973,
+      "usdPer": 1.11420619,
+      "perUsd": 0.8975,
       "pair": "EURUSD=X"
     },
     "GBP": {
-      "usdPer": 1.33488178,
-      "perUsd": 0.74913,
+      "usdPer": 1.33491743,
+      "perUsd": 0.74911,
       "pair": "GBPUSD=X"
     },
     "AUD": {
-      "usdPer": 0.68643606,
-      "perUsd": 1.4568,
+      "usdPer": 0.68657738,
+      "perUsd": 1.4565,
       "pair": "AUDUSD=X"
     },
     "NZD": {
-      "usdPer": 0.55404729,
-      "perUsd": 1.8049,
+      "usdPer": 0.55432373,
+      "perUsd": 1.804,
       "pair": "NZDUSD=X"
     },
     "JPY": {
-      "usdPer": 0.00630859,
-      "perUsd": 158.514008,
+      "usdPer": 0.00630915,
+      "perUsd": 158.5,
       "pair": "USDJPY=X"
     },
     "KRW": {
-      "usdPer": 0.00073332,
-      "perUsd": 1363.670044,
+      "usdPer": 0.0007331,
+      "perUsd": 1364.069946,
       "pair": "USDKRW=X"
     },
     "CNY": {
@@ -41,13 +41,13 @@
       "pair": "USDCNY=X"
     },
     "HKD": {
-      "usdPer": 0.12756306,
-      "perUsd": 7.83926,
+      "usdPer": 0.12756387,
+      "perUsd": 7.83921,
       "pair": "USDHKD=X"
     },
     "TWD": {
-      "usdPer": 0.0305092,
-      "perUsd": 32.777,
+      "usdPer": 0.03051572,
+      "perUsd": 32.77,
       "pair": "USDTWD=X"
     },
     "INR": {
@@ -56,33 +56,33 @@
       "pair": "USDINR=X"
     },
     "CAD": {
-      "usdPer": 0.70789947,
-      "perUsd": 1.41263,
+      "usdPer": 0.70777422,
+      "perUsd": 1.41288,
       "pair": "USDCAD=X"
     },
     "CHF": {
-      "usdPer": 1.21894736,
-      "perUsd": 0.82038,
+      "usdPer": 1.21856108,
+      "perUsd": 0.82064,
       "pair": "USDCHF=X"
     },
     "SGD": {
-      "usdPer": 0.77936248,
-      "perUsd": 1.2831,
+      "usdPer": 0.77928356,
+      "perUsd": 1.28323,
       "pair": "USDSGD=X"
     },
     "SEK": {
-      "usdPer": 0.10104572,
-      "perUsd": 9.89651,
+      "usdPer": 0.10102908,
+      "perUsd": 9.89814,
       "pair": "USDSEK=X"
     },
     "NOK": {
-      "usdPer": 0.10563667,
-      "perUsd": 9.46641,
+      "usdPer": 0.10563544,
+      "perUsd": 9.46652,
       "pair": "USDNOK=X"
     },
     "DKK": {
-      "usdPer": 0.14906618,
-      "perUsd": 6.70843,
+      "usdPer": 0.14903974,
+      "perUsd": 6.70962,
       "pair": "USDDKK=X"
     },
     "BRL": {
@@ -91,13 +91,13 @@
       "pair": "USDBRL=X"
     },
     "MXN": {
-      "usdPer": 0.05369084,
-      "perUsd": 18.625151,
+      "usdPer": 0.05372012,
+      "perUsd": 18.615,
       "pair": "USDMXN=X"
     },
     "ZAR": {
-      "usdPer": 0.06041493,
-      "perUsd": 16.5522,
+      "usdPer": 0.0604299,
+      "perUsd": 16.5481,
       "pair": "USDZAR=X"
     },
     "SAR": {
@@ -106,8 +106,8 @@
       "pair": "USDSAR=X"
     },
     "ILS": {
-      "usdPer": 0.31403089,
-      "perUsd": 3.1844,
+      "usdPer": 0.31413941,
+      "perUsd": 3.1833,
       "pair": "USDILS=X"
     },
     "THB": {
@@ -131,13 +131,13 @@
       "pair": "USDRUB=X"
     },
     "PLN": {
-      "usdPer": 0.25368348,
-      "perUsd": 3.94192,
+      "usdPer": 0.2536526,
+      "perUsd": 3.9424,
       "pair": "USDPLN=X"
     },
     "TRY": {
-      "usdPer": 0.01994006,
-      "perUsd": 50.150299,
+      "usdPer": 0.01994695,
+      "perUsd": 50.132969,
       "pair": "USDTRY=X"
     },
     "EGP": {
@@ -146,8 +146,8 @@
       "pair": "USDEGP=X"
     },
     "HUF": {
-      "usdPer": 0.00306852,
-      "perUsd": 325.890015,
+      "usdPer": 0.00306861,
+      "perUsd": 325.880005,
       "pair": "USDHUF=X"
     },
     "CLP": {
@@ -161,8 +161,8 @@
       "pair": "USDPHP=X"
     },
     "CZK": {
-      "usdPer": 0.04579929,
-      "perUsd": 21.8344,
+      "usdPer": 0.04578964,
+      "perUsd": 21.839001,
       "pair": "USDCZK=X"
     },
     "COP": {
@@ -171,8 +171,8 @@
       "pair": "USDCOP=X"
     },
     "PEN": {
-      "usdPer": 0.29067233,
-      "perUsd": 3.4403,
+      "usdPer": 0.29068077,
+      "perUsd": 3.4402,
       "pair": "USDPEN=X"
     },
     "AED": {
