@@ -99,16 +99,42 @@ def yoy_series(raw, periods_per_year):
     return out
 
 
+def months_shift(date_str, k):
+    """'YYYY-MM-01' moved k months (k > 0 back in time)."""
+    y, m = int(date_str[:4]), int(date_str[5:7]) - k
+    while m <= 0:
+        m += 12
+        y -= 1
+    while m > 12:
+        m -= 12
+        y += 1
+    return f"{y:04d}-{m:02d}-01"
+
+
 def build_quad_history(gdp_yoy, cpi_yoy, lookback=30):
-    """Replicates buildQuadHistory: align GDP YoY onto CPI dates, compute RoCs."""
+    """z177: the inflation RoC is CPI YoY minus CPI YoY of the month THREE CALENDAR MONTHS earlier - looked up by date.
+    It used to step back three ROWS, so across a missing month (October 2025: no CPI was published) it reached four
+    months back, and the first rows of the window used one- and two-month windows. A missing comparison month is
+    interpolated from its two neighbours (flagged); with no neighbours the row is left out."""
+    by_date = {c["date"]: c["yoy"] for c in cpi_yoy}
+
+    def yoy_at(d):
+        if d in by_date:
+            return by_date[d], False
+        a, b = months_shift(d, 1), months_shift(d, -1)
+        if a in by_date and b in by_date:
+            return (by_date[a] + by_date[b]) / 2, True
+        return None, False
+
     recent = cpi_yoy[-lookback:]
     result = []
-    for i in range(1, len(recent)):
-        cpi_point = recent[i]
-        cpi_prior = recent[max(i - 3, 0)]            # 3-month RoC for inflation
-        inflation_roc = cpi_point["yoy"] - cpi_prior["yoy"]
+    for cpi_point in recent:
+        prior, interp = yoy_at(months_shift(cpi_point["date"], 3))
+        if prior is None:
+            continue
+        inflation_roc = cpi_point["yoy"] - prior
 
-        # latest GDP YoY at or before this CPI date
+        # latest GDP YoY at or before this CPI date (FRED dates a quarter by its first day)
         gdp_point = next((g for g in reversed(gdp_yoy) if g["date"] <= cpi_point["date"]), None)
         gdp_prior = None
         if gdp_point:
@@ -117,14 +143,18 @@ def build_quad_history(gdp_yoy, cpi_yoy, lookback=30):
             continue
         growth_roc = gdp_point["yoy"] - gdp_prior["yoy"]
 
-        result.append({
+        row = {
             "date": cpi_point["date"],
             "growthYoY": round(gdp_point["yoy"], 6),
             "inflationYoY": round(cpi_point["yoy"], 6),
             "growthRoC": round(growth_roc, 6),
             "inflationRoC": round(inflation_roc, 6),
             "quad": classify_quad(growth_roc, inflation_roc),
-        })
+            "gdpQuarter": gdp_point["date"],
+        }
+        if interp:
+            row["interpolated"] = "comparison month missing - average of its neighbours"
+        result.append(row)
     return result
 
 
@@ -138,6 +168,68 @@ def classify_quad(growth_roc, inflation_roc):
     if not g_up and i_up:
         return 3
     return 4
+
+
+# ---------------------------------------------------------------------------------------------- z177: one shape
+# quad.json used to be REWRITTEN by each script: this one at 0915 ET (current = the official GDP/CPI quad), the market
+# nowcast after the close (current = its own quad). So "the quad" read by the bot and the app flipped twice a day
+# (10-26..11-06: official Q3 by day, nowcast Q4 by night), the certainty score lost its official reference every
+# morning, and the nowcast's track record logged official prints as if they were calls. Now both scripts keep both:
+#   official   the last GDP/CPI quad (this script)            nowcast   the market nowcast (quad_nowcast.py)
+#   current    the nowcast while it is fresh (<= 4 days), else the official quad - one answer all day
+#   agree      same quad? which axes (growth / inflation) agree?          officialLatest   = official (back-compat)
+def load_doc():
+    try:
+        return json.loads(OUT.read_text())
+    except Exception:
+        return {}
+
+
+def _et_date():
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo("America/New_York")).date()
+    except Exception:
+        return datetime.now(timezone.utc).date()
+
+
+def agreement(official, nowcast):
+    if not (official and nowcast and official.get("quad") in QUAD_LABELS and nowcast.get("quad") in QUAD_LABELS):
+        return None
+    axes = {1: (1, -1), 2: (1, 1), 3: (-1, 1), 4: (-1, -1)}
+    a, b = axes[official["quad"]], axes[nowcast["quad"]]
+    return {"sameQuad": a == b, "growth": a[0] == b[0], "inflation": a[1] == b[1], "axesShared": (a[0] == b[0]) + (a[1] == b[1]),
+            "note": ("the market nowcast and the official GDP/CPI quad agree" if a == b else
+                     f"the market nowcast (Q{nowcast['quad']}) and the official GDP/CPI quad (Q{official['quad']}) disagree on "
+                     + " and ".join(x for x, ok in (("growth", a[0] == b[0]), ("inflation", a[1] == b[1])) if not ok))}
+
+
+def merge_doc(doc, official=None, nowcast=None, history=None, fresh_days=4):
+    doc = dict(doc or {})
+    if official is None:
+        cur = doc.get("current") or {}
+        official = doc.get("official") or doc.get("officialLatest") or (cur if cur.get("method") != "market-nowcast" and cur.get("quad") else None)
+    if nowcast is None:
+        cur = doc.get("current") or {}
+        nowcast = doc.get("nowcast") or (cur if cur.get("method") == "market-nowcast" else None)
+    fresh = False
+    if nowcast and nowcast.get("asOf"):
+        try:
+            fresh = (_et_date() - datetime.strptime(str(nowcast["asOf"])[:10], "%Y-%m-%d").date()).days <= fresh_days
+        except ValueError:
+            fresh = False
+    doc.update({"_schema": "valuatio-macro-quad/v2",
+                "_description": "Growth/inflation quad (1 Goldilocks, 2 Reflation, 3 Stagflation, 4 Deflation). official = FRED GDPC1 + "
+                                "CPIAUCSL (lags ~1-2 months); nowcast = daily market rates of change; current = the nowcast while fresh, "
+                                "else official.",
+                "official": official, "officialLatest": official, "nowcast": nowcast,
+                "current": nowcast if (nowcast and fresh) else official,
+                "agree": agreement(official, nowcast),
+                "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "source": "FRED (GDPC1, CPIAUCSL) + market nowcast"})
+    if history is not None:
+        doc["history"] = history
+    doc.pop("_nowcast_note", None)
+    return doc
 
 
 def main():
@@ -166,27 +258,24 @@ def main():
 
     current = history[-1]
     quad = current["quad"]
-    out = {
-        "_schema": "valuatio-macro-quad/v1",
-        "_description": "Hedgeye-style growth/inflation quad from FRED GDPC1 + CPIAUCSL. "
-                        "quad: 1=Goldilocks 2=Reflation 3=Stagflation 4=Deflation.",
+    official = {
+        "quad": quad,
+        "label": QUAD_LABELS[quad],
+        "method": "official-fred",
+        "source": "FRED GDPC1 + CPIAUCSL",
+        "asOf": current["date"],
+        "gdpQuarter": current.get("gdpQuarter"),
+        "growthYoY": current["growthYoY"],
+        "inflationYoY": current["inflationYoY"],
+        "growthRoC": current["growthRoC"],
+        "inflationRoC": current["inflationRoC"],
+        "growthDir": "accelerating" if current["growthRoC"] > 0 else "decelerating",
+        "inflationDir": "accelerating" if current["inflationRoC"] > 0 else "decelerating",
+        "favors": QUAD_SECTOR_FAVORS[quad]["favors"],
+        "hurts": QUAD_SECTOR_FAVORS[quad]["hurts"],
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "source": "FRED (GDPC1, CPIAUCSL)",
-        "current": {
-            "quad": quad,
-            "label": QUAD_LABELS[quad],
-            "asOf": current["date"],
-            "growthYoY": current["growthYoY"],
-            "inflationYoY": current["inflationYoY"],
-            "growthRoC": current["growthRoC"],
-            "inflationRoC": current["inflationRoC"],
-            "growthDir": "accelerating" if current["growthRoC"] > 0 else "decelerating",
-            "inflationDir": "accelerating" if current["inflationRoC"] > 0 else "decelerating",
-            "favors": QUAD_SECTOR_FAVORS[quad]["favors"],
-            "hurts": QUAD_SECTOR_FAVORS[quad]["hurts"],
-        },
-        "history": history[-18:],     # last ~18 monthly readings for trend
     }
+    out = merge_doc(load_doc(), official=official, history=history[-18:])
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, separators=(",", ":")))
     # z109: the FULL official quad history (FRED from 2005) for backtests - e.g.
@@ -201,10 +290,13 @@ def main():
         "rows": [{"date": h["date"], "quad": h["quad"], "growthRoC": h["growthRoC"], "inflationRoC": h["inflationRoC"]} for h in full],
     }, separators=(",", ":")))
     log(f"Wrote quad_history_full.json ({len(full)} months, {full[0]['date'] if full else '-'} -> {full[-1]['date'] if full else '-'})")
-    c = out["current"]
-    log(f"Quad {quad} — {c['label']} · as of {c['asOf']} · "
+    c = out["official"]
+    log(f"Official quad {quad} — {c['label']} · as of {c['asOf']} · "
         f"growth {c['growthYoY']*100:.1f}% ({c['growthDir']}), "
         f"inflation {c['inflationYoY']*100:.1f}% ({c['inflationDir']})")
+    cur = out["current"] or {}
+    log(f"current (what the app and the bot read): Quad {cur.get('quad')} · {cur.get('method')} · as of {cur.get('asOf')}"
+        + (f" · {out['agree']['note']}" if out.get("agree") else ""))
     log(f"Wrote {OUT}")
 
 
