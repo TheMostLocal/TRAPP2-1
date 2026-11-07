@@ -10,9 +10,10 @@ their recent rate-of-change. It answers "what quad does the market imply TODAY",
 independent of the lagged government prints and independent of the quad-history
 chart (which keeps using the GDP/CPI series).
 
-It rewrites quad.json's `current` with the nowcast (asOf = today) and preserves
-`history`, so the chart still shows the official monthly path while the hero shows
-a fresh estimate. Growth↑Inflation↑=Q2, ↑↓=Q1, ↓↑=Q3, ↓↓=Q4.
+z177: it writes its result to quad.json's `nowcast` block and keeps the `official` GDP/CPI block and the
+history (fetch_macro_quad.merge_doc - one shape for both scripts); `current` = the nowcast while fresh, `agree`
+says whether the two quads agree. asOf is the Eastern date (it was the UTC date - a run after 2000 ET was
+stamped tomorrow). Growth↑Inflation↑=Q2, ↑↓=Q1, ↓↑=Q3, ↓↓=Q4.
 """
 import json, os, math
 from datetime import datetime, timezone
@@ -53,6 +54,14 @@ def _sig(series, n21=21, n63=63):
     z = 0.6 * _zchange(series, n21) + 0.4 * _zchange(series, n63)
     return math.tanh(z / 1.5)
 
+def _et_today():
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
+    except Exception:
+        return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+
 def nowcast():
     S = {k: _load(k) for k in ["DCOILWTICO", "BAMLH0A0HYM2", "T10Y2Y", "VIXCLS", "DGS10", "DGS2", "DEXUSEU"]}
     sig = {k: _sig(v) for k, v in S.items() if v}
@@ -79,7 +88,7 @@ def nowcast():
     def dir_lbl(v): return "accelerating" if (v > DEAD) else "decelerating" if (v < -DEAD) else "flat"
     drivers = sorted(({"signal": k, "value": round(v, 3)} for k, v in sig.items()), key=lambda d: abs(d["value"]), reverse=True)
     return {
-        "quad": quad, "label": names[quad], "asOf": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "quad": quad, "label": names[quad], "asOf": _et_today(),
         "method": "market-nowcast", "source": "daily market ROC (oil, HY OAS, 2s10s, VIX, UST, USD)",
         "growthScore": round(growth, 4), "inflationScore": round(inflation, 4),
         "growthDir": dir_lbl(growth), "inflationDir": dir_lbl(inflation),
@@ -110,27 +119,23 @@ def inputs_ok():
 def main():
     if not inputs_ok():
         return 0
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from fetch_macro_quad import merge_doc
     nc = nowcast()
     doc = {}
     if os.path.exists(QUAD):
-        try: doc = json.load(open(QUAD))
-        except Exception: doc = {}
-    prevOfficial = doc.get("current")
-    if prevOfficial and prevOfficial.get("method") != "market-nowcast":
-        doc["officialLatest"] = prevOfficial          # keep the last GDP/CPI print for reference
-    ref = doc.get("officialLatest") or (prevOfficial if (prevOfficial and prevOfficial.get("method") != "market-nowcast") else {})
-    for k in ("growthYoY", "inflationYoY", "growthRoC", "inflationRoC"):
-        if isinstance(ref, dict) and k in ref:
-            nc[k] = ref[k]                              # last official value (context / back-compat)
-    if isinstance(ref, dict):
-        nc["officialAsOf"] = ref.get("asOf")
-    doc.setdefault("_schema", "valuatio-macro-quad/v1")
-    doc["_nowcast_note"] = "current = fresh market nowcast (quad_nowcast.py); history = FRED GDP/CPI monthly; officialLatest = last GDP/CPI print."
-    doc["current"] = nc
+        try:
+            doc = json.load(open(QUAD))
+        except Exception:
+            doc = {}
+    doc = merge_doc(doc, nowcast=nc)
     doc["nowcast_generated_at"] = datetime.now(timezone.utc).isoformat()
     json.dump(doc, open(QUAD, "w"), indent=1)
+    off = doc.get("official") or {}
     print(f"NOWCAST → Quad {nc['quad']} · {nc['label']} · asOf {nc['asOf']} · conf {nc['confidence']}")
     print(f"  growth={nc['growthScore']:+.3f} ({nc['growthDir']}) · inflation={nc['inflationScore']:+.3f} ({nc['inflationDir']})")
+    print(f"  official GDP/CPI: Quad {off.get('quad')} as of {off.get('asOf')} · {(doc.get('agree') or {}).get('note', 'no official quad on file')}")
     print("  drivers:", ", ".join(f"{d['signal']} {d['value']:+.2f}" for d in nc["drivers"]))
     return 0
 
