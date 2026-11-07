@@ -80,9 +80,11 @@ def main():
     s_stab = clip01(1 - flips / 4)
     why.append(f"{flips} regime flip(s) in the last {len(last20)} sessions")
 
-    # 3. quad agreement (nowcast vs official)
-    qn = (quad.get("current") or {}).get("quad")
-    qo = (quad.get("officialLatest") or {}).get("quad")
+    # 3. quad agreement (nowcast vs official) - z177: read the two blocks by name; "current" can be either
+    _cur = quad.get("current") or {}
+    _nc = quad.get("nowcast") or (_cur if _cur.get("method") == "market-nowcast" else {})
+    qn = _nc.get("quad")
+    qo = ((quad.get("official") or quad.get("officialLatest")) or {}).get("quad")
     if qn in QUAD_AXES and qo in QUAD_AXES:
         shared = sum(1 for a, b in zip(QUAD_AXES[qn], QUAD_AXES[qo]) if a == b)
         s_quad = shared / 2
@@ -104,7 +106,7 @@ def main():
 
     # 4b. quad nowcast track record (z101): log today's call; judge past calls
     # against the OFFICIAL quad for the same month once GDP/CPI have printed.
-    qcur = quad.get("current") or {}
+    qcur = _nc                       # z177: only the market nowcast is a "call" - never an official print
     calls_q = load(QUAD_CALLS, []) or []
     today_q = str(qcur.get("asOf") or cur.get("date") or "")[:10]
     if qn in QUAD_AXES and today_q:
