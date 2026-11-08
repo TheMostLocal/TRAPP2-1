@@ -1,18 +1,18 @@
 {
   "_schema": "valuatio-fx-rates-v1",
   "_description": "USD-anchored FX rates, one convention per currency.",
-  "updatedAt": "2026-11-08T18:47:02.910842Z",
+  "updatedAt": "2026-11-08T19:02:03.317154Z",
   "base": "USD",
   "source": "fetch_fx.py (yfinance)",
   "rates": {
     "EUR": {
-      "usdPer": 1.12282598,
-      "perUsd": 0.89061,
+      "usdPer": 1.11408198,
+      "perUsd": 0.8976,
       "pair": "EURUSD=X"
     },
     "GBP": {
-      "usdPer": 1.34560525,
-      "perUsd": 0.74316,
+      "usdPer": 1.33434749,
+      "perUsd": 0.74943,
       "pair": "GBPUSD=X"
     },
     "AUD": {
@@ -21,13 +21,13 @@
       "pair": "AUDUSD=X"
     },
     "NZD": {
-      "usdPer": 0.55635917,
-      "perUsd": 1.7974,
+      "usdPer": 0.55639017,
+      "perUsd": 1.7973,
       "pair": "NZDUSD=X"
     },
     "JPY": {
-      "usdPer": 0.00631532,
-      "perUsd": 158.345001,
+      "usdPer": 0.00631493,
+      "perUsd": 158.354996,
       "pair": "USDJPY=X"
     },
     "KRW": {
@@ -56,8 +56,8 @@
       "pair": "USDINR=X"
     },
     "CAD": {
-      "usdPer": 0.70786434,
-      "perUsd": 1.4127,
+      "usdPer": 0.70781429,
+      "perUsd": 1.4128,
       "pair": "USDCAD=X"
     },
     "CHF": {
@@ -81,8 +81,8 @@
       "pair": "USDNOK=X"
     },
     "DKK": {
-      "usdPer": 0.1490313,
-      "perUsd": 6.71,
+      "usdPer": 0.14904684,
+      "perUsd": 6.7093,
       "pair": "USDDKK=X"
     },
     "BRL": {
@@ -131,13 +131,13 @@
       "pair": "USDRUB=X"
     },
     "PLN": {
-      "usdPer": 0.25385866,
-      "perUsd": 3.9392,
+      "usdPer": 0.25388443,
+      "perUsd": 3.9388,
       "pair": "USDPLN=X"
     },
     "TRY": {
-      "usdPer": 0.01994217,
-      "perUsd": 50.145,
+      "usdPer": 0.01994181,
+      "perUsd": 50.145901,
       "pair": "USDTRY=X"
     },
     "EGP": {
@@ -146,8 +146,8 @@
       "pair": "USDEGP=X"
     },
     "HUF": {
-      "usdPer": 0.00307059,
-      "perUsd": 325.670013,
+      "usdPer": 0.00307154,
+      "perUsd": 325.570007,
       "pair": "USDHUF=X"
     },
     "CLP": {
