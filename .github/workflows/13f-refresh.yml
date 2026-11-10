@@ -5,6 +5,7 @@
 #  Replace the existing 13f-refresh.yml. Only change: the push step now
 #  integrates the remote before pushing (ours wins on data/ conflicts),
 #  fixing the 'fetch first' rejection when it races the nightly.
+#  z180: SEC filings for all four equity books, one file per company (data/sec_filings/<T>.json) committed too.
 # ============================================================
 name: 13F Quarterly Refresh
 
@@ -46,7 +47,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/13f/ data/sec_filings.json
+          # z180: one path per add (a missing path made a multi-path add stage nothing) + the per-company files
+          for p in data/13f data/sec_filings.json data/sec_filings; do [ -e "$p" ] && git add -A "$p"; done
           if git diff --staged --quiet; then
             echo "No 13F/filings changes."
           else
@@ -60,8 +62,7 @@ jobs:
               echo "push $i rejected — integrating remote (ours wins on data/)"
               git fetch origin main || true
               git merge -X ours --allow-unrelated-histories --no-edit origin/main 2>/dev/null || true
-              git checkout --ours -- data/13f/ data/sec_filings.json 2>/dev/null || true
-              git add data/13f/ data/sec_filings.json 2>/dev/null || true
+              for p in data/13f data/sec_filings.json data/sec_filings; do [ -e "$p" ] && { git checkout --ours -- "$p" 2>/dev/null; git add -A "$p"; }; done
               git commit --no-edit 2>/dev/null || true
               sleep 4
             done
