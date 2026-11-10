@@ -20,6 +20,12 @@ The app reads this to show a "Recent SEC Filings" section per company and to
 feed an "earnings recency" signal into the engine (a company that just filed a
 10-K/10-Q is in a known fundamental state; stale filings = more uncertainty).
 
+z180: ALL FOUR equity books (TRAPP2, TRAPP2-2, TRAPP2-3, TRAPP2-4 - it read only the first two, so ~1,900
+companies never had filings), listing symbols normalised the way the books read them (BF.A -> BF-A, the form SEC's
+ticker map uses), and ONE FILE PER COMPANY: data/sec_filings/<TICKER>.json (~4 KB, what the Company tab now reads).
+The combined data/sec_filings.json is still written (compact, no indentation) for bulk readers - the app no longer
+downloads it at startup. A company whose fetch fails keeps its previous file.
+
 EDGAR requires a descriptive User-Agent — set EDGAR_UA. Quarterly/monthly cadence
 is plenty since filings are infrequent. stdlib only.
 """
@@ -48,15 +54,32 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(SCRIPT_DIR)
 TICKERS_PATH = os.path.join(REPO_ROOT, "tickers.txt")   # optional local fallback
 OUT_PATH = os.path.join(REPO_ROOT, "data", "sec_filings.json")
+SHARD_DIR = os.path.join(REPO_ROOT, "data", "sec_filings")      # z180: one file per company
 
 # SEC filings are company-specific, so the equity ticker lists live in the
-# US-equity repos (TRAPP2 + TRAPP2-2), NOT in TRAPP2-1 (which holds non-equity
-# vehicles). This fetcher pulls those lists remotely. Edit the URLs if your repo
-# names / branches differ.
+# US-equity repos, NOT in TRAPP2-1 (which holds non-equity vehicles). This
+# fetcher pulls those lists remotely. z180: all four equity books.
 EQUITY_TICKER_URLS = [
-    f"https://raw.githubusercontent.com/{_GH_OWNER}/TRAPP2/main/data/tickers.txt",
-    f"https://raw.githubusercontent.com/{_GH_OWNER}/TRAPP2-2/main/data/tickers.txt",
+    f"https://raw.githubusercontent.com/{_GH_OWNER}/{book}/main/data/tickers.txt"
+    for book in ("TRAPP2", "TRAPP2-2", "TRAPP2-3", "TRAPP2-4")
 ]
+
+
+# z178 / z180 - listing symbols -> the form Yahoo, the SEC and every book use (same rule as TRAPP2-CORE):
+#   ABR$D -> ABR-PD   BRK.B -> BRK-B   XYZ.U -> XYZ-UN   XYZ.W / .WS -> XYZ-WT   XYZ.R -> XYZ-RI; the rest unchanged
+def norm_symbol(t):
+    import re as _re
+    t = (t or "").strip().upper()
+    if "$" in t:
+        root, ser = t.split("$", 1)
+        return f"{root}-P{ser}" if ser else f"{root}-P"
+    m = _re.fullmatch(r"([A-Z]{1,5})\.(U|W|WS|R)", t)
+    if m:
+        return m.group(1) + {"U": "-UN", "W": "-WT", "WS": "-WT", "R": "-RI"}[m.group(2)]
+    m = _re.fullmatch(r"([A-Z]{1,5})\.([A-C]|V)", t)
+    if m:
+        return f"{m.group(1)}-{m.group(2)}"
+    return t
 
 SEC_HEADERS = {"User-Agent": EDGAR_UA, "Accept-Encoding": "gzip, deflate"}
 
@@ -103,7 +126,7 @@ def load_tickers():
             print(f"   could not fetch {url}", file=sys.stderr)
             continue
         for line in txt.splitlines():
-            t = line.strip().upper()
+            t = norm_symbol(line.split("#")[0])                       # z180: BF.A -> BF-A (SEC's form)
             if _is_equity_ticker(t) and t not in seen:
                 seen.add(t)
                 out.append(t)
@@ -113,7 +136,7 @@ def load_tickers():
         try:
             with open(TICKERS_PATH) as f:
                 for line in f:
-                    t = line.strip().upper()
+                    t = norm_symbol(line.split("#")[0])
                     if _is_equity_ticker(t) and t not in seen:
                         seen.add(t)
                         out.append(t)
@@ -180,7 +203,23 @@ def _write_out(companies):
     }
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w") as f:
-        json.dump(doc, f, indent=2)
+        json.dump(doc, f, separators=(",", ":"))                     # z180: compact (was indent=2: ~45 % larger)
+
+
+def _write_shard(tic, rec):
+    """z180: data/sec_filings/<TICKER>.json - one company, what the Company tab reads."""
+    os.makedirs(SHARD_DIR, exist_ok=True)
+    with open(os.path.join(SHARD_DIR, f"{tic}.json"), "w") as f:
+        json.dump(dict(rec, ticker=tic), f, separators=(",", ":"))
+
+
+def _read_shard(tic):
+    try:
+        with open(os.path.join(SHARD_DIR, f"{tic}.json")) as f:
+            rec = json.load(f)
+        return rec if isinstance(rec, dict) and rec.get("filings") else None
+    except Exception:
+        return None
 
 
 def main():
@@ -201,7 +240,7 @@ def main():
     time.sleep(0.3)
 
     out = {}
-    hit = 0
+    hit = kept = 0
     for tic in tickers:
         cik = cik_map.get(tic)
         if not cik:
@@ -209,6 +248,10 @@ def main():
         filings = recent_filings(cik)
         time.sleep(0.25)  # polite to EDGAR
         if not filings:
+            prev = _read_shard(tic)                                   # z180: a failed fetch keeps the company's last file
+            if prev:
+                out[tic] = {k: v for k, v in prev.items() if k != "ticker"}
+                kept += 1
             continue
         # Most recent 10-K or 10-Q = latest "earnings" filing
         latest_earnings = next((f for f in filings if f["form"] in ("10-K", "10-Q", "20-F", "6-K")), None)
@@ -218,12 +261,14 @@ def main():
             "filings": filings,
             "updatedAt": datetime.datetime.utcnow().isoformat() + "Z",
         }
+        _write_shard(tic, out[tic])
         hit += 1
-        if hit % 25 == 0:
+        if hit % 100 == 0:
             print(f"   ...{hit} companies with filings")
 
     _write_out(out)
-    print(f"[sec] wrote filings for {hit} companies -> {OUT_PATH}")
+    print(f"[sec] {len(tickers)} equity tickers · wrote filings for {hit} companies ({kept} kept their previous file) "
+          f"-> {OUT_PATH} + {SHARD_DIR}/<TICKER>.json")
 
 
 if __name__ == "__main__":
