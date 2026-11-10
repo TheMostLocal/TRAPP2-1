@@ -1,6 +1,6 @@
 {
- "asOf": "2026-11-09",
- "generatedAt": "2026-11-09T22:59:09+00:00",
+ "asOf": "2026-11-10",
+ "generatedAt": "2026-11-10T00:23:00+00:00",
  "regime": "neutral",
  "quadNowcast": 4,
  "quadOfficial": 3,
@@ -15,7 +15,7 @@
    "weight": 0.3
   },
   "stability": {
-   "flips20": 7,
+   "flips20": 6,
    "score": 0.0,
    "weight": 0.25
   },
@@ -51,20 +51,13 @@
  },
  "why": [
   "classifier picks neutral at 56% vs 18% runner-up",
-  "7 regime flip(s) in the last 20 sessions",
+  "6 regime flip(s) in the last 20 sessions",
   "quad nowcast Q4 vs official Q3 (1/2 axes agree)",
   "market regime family 'flat' vs quad growth axis \u2192 0.5",
   "quad nowcast right 100% of 1 judged call(s) \u2014 fewer than 10, not yet used",
   "track record 70% right over 84 judged calls (naive base rate 62%)"
  ],
  "calls": [
-  {
-   "date": "2026-07-07",
-   "regime": "expansion",
-   "family": "up",
-   "fwd21Pct": 2.95,
-   "correct": true
-  },
   {
    "date": "2026-07-08",
    "regime": "expansion",
@@ -629,6 +622,11 @@
   },
   {
    "date": "2026-11-09",
+   "regime": "neutral",
+   "family": "flat"
+  },
+  {
+   "date": "2026-11-10",
    "regime": "neutral",
    "family": "flat"
   }
