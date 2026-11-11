@@ -1,38 +1,38 @@
 {
   "_schema": "valuatio-fx-rates-v1",
   "_description": "USD-anchored FX rates, one convention per currency.",
-  "updatedAt": "2026-11-11T23:17:14.429018Z",
+  "updatedAt": "2026-11-11T23:32:05.744908Z",
   "base": "USD",
   "source": "fetch_fx.py (yfinance)",
   "rates": {
     "EUR": {
-      "usdPer": 1.11000109,
-      "perUsd": 0.9009,
+      "usdPer": 1.10987794,
+      "perUsd": 0.901,
       "pair": "EURUSD=X"
     },
     "GBP": {
-      "usdPer": 1.32812703,
-      "perUsd": 0.75294,
+      "usdPer": 1.32773912,
+      "perUsd": 0.75316,
       "pair": "GBPUSD=X"
     },
     "AUD": {
-      "usdPer": 0.68422848,
-      "perUsd": 1.4615,
+      "usdPer": 0.68427533,
+      "perUsd": 1.4614,
       "pair": "AUDUSD=X"
     },
     "NZD": {
-      "usdPer": 0.55654496,
-      "perUsd": 1.7968,
+      "usdPer": 0.55639017,
+      "perUsd": 1.7973,
       "pair": "NZDUSD=X"
     },
     "JPY": {
-      "usdPer": 0.00626582,
-      "perUsd": 159.595993,
+      "usdPer": 0.00626135,
+      "perUsd": 159.710007,
       "pair": "USDJPY=X"
     },
     "KRW": {
-      "usdPer": 0.00074817,
-      "perUsd": 1336.589966,
+      "usdPer": 0.00074815,
+      "perUsd": 1336.630005,
       "pair": "USDKRW=X"
     },
     "CNY": {
@@ -41,8 +41,8 @@
       "pair": "USDCNY=X"
     },
     "HKD": {
-      "usdPer": 0.12749085,
-      "perUsd": 7.8437,
+      "usdPer": 0.12748598,
+      "perUsd": 7.844,
       "pair": "USDHKD=X"
     },
     "TWD": {
@@ -56,33 +56,33 @@
       "pair": "USDINR=X"
     },
     "CAD": {
-      "usdPer": 0.70205,
-      "perUsd": 1.4244,
+      "usdPer": 0.70175441,
+      "perUsd": 1.425,
       "pair": "USDCAD=X"
     },
     "CHF": {
-      "usdPer": 1.20202424,
-      "perUsd": 0.83193,
+      "usdPer": 1.20157649,
+      "perUsd": 0.83224,
       "pair": "USDCHF=X"
     },
     "SGD": {
-      "usdPer": 0.7788101,
-      "perUsd": 1.28401,
+      "usdPer": 0.77861001,
+      "perUsd": 1.28434,
       "pair": "USDSGD=X"
     },
     "SEK": {
-      "usdPer": 0.10037631,
-      "perUsd": 9.96251,
+      "usdPer": 0.10036281,
+      "perUsd": 9.96385,
       "pair": "USDSEK=X"
     },
     "NOK": {
-      "usdPer": 0.10472323,
-      "perUsd": 9.54898,
+      "usdPer": 0.10468726,
+      "perUsd": 9.55226,
       "pair": "USDNOK=X"
     },
     "DKK": {
-      "usdPer": 0.14846047,
-      "perUsd": 6.7358,
+      "usdPer": 0.14843776,
+      "perUsd": 6.73683,
       "pair": "USDDKK=X"
     },
     "BRL": {
@@ -91,13 +91,13 @@
       "pair": "USDBRL=X"
     },
     "MXN": {
-      "usdPer": 0.05372589,
-      "perUsd": 18.613001,
+      "usdPer": 0.0537132,
+      "perUsd": 18.617399,
       "pair": "USDMXN=X"
     },
     "ZAR": {
-      "usdPer": 0.06025367,
-      "perUsd": 16.5965,
+      "usdPer": 0.06022754,
+      "perUsd": 16.603701,
       "pair": "USDZAR=X"
     },
     "SAR": {
@@ -106,8 +106,8 @@
       "pair": "USDSAR=X"
     },
     "ILS": {
-      "usdPer": 0.31505986,
-      "perUsd": 3.174,
+      "usdPer": 0.31521876,
+      "perUsd": 3.1724,
       "pair": "USDILS=X"
     },
     "THB": {
@@ -131,13 +131,13 @@
       "pair": "USDRUB=X"
     },
     "PLN": {
-      "usdPer": 0.25183843,
-      "perUsd": 3.9708,
+      "usdPer": 0.25165463,
+      "perUsd": 3.9737,
       "pair": "USDPLN=X"
     },
     "TRY": {
-      "usdPer": 0.01990002,
-      "perUsd": 50.251202,
+      "usdPer": 0.01990129,
+      "perUsd": 50.248001,
       "pair": "USDTRY=X"
     },
     "EGP": {
@@ -146,8 +146,8 @@
       "pair": "USDEGP=X"
     },
     "HUF": {
-      "usdPer": 0.0030446,
-      "perUsd": 328.450012,
+      "usdPer": 0.00304294,
+      "perUsd": 328.630005,
       "pair": "USDHUF=X"
     },
     "CLP": {
@@ -161,13 +161,13 @@
       "pair": "USDPHP=X"
     },
     "CZK": {
-      "usdPer": 0.04553838,
-      "perUsd": 21.959499,
+      "usdPer": 0.04555186,
+      "perUsd": 21.952999,
       "pair": "USDCZK=X"
     },
     "COP": {
-      "usdPer": 0.00030486,
-      "perUsd": 3280.23999,
+      "usdPer": 0.00030418,
+      "perUsd": 3287.560059,
       "pair": "USDCOP=X"
     },
     "PEN": {
