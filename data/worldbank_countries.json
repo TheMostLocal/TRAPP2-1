@@ -1,7 +1,7 @@
 {
   "_schema": "valuatio-worldbank-v1",
   "_description": "Annual GDP + trade composition from the World Bank (free API, no key). Data is typically 6-18 months lagged.",
-  "updatedAt": "2026-11-12T21:45:06.798002Z",
+  "updatedAt": "2026-11-12T22:26:33.393574Z",
   "source": "World Bank (api.worldbank.org)",
   "countries": {
     "USA": {
@@ -96,37 +96,73 @@
       "importsPctGdpYear": "2025",
       "tradePctGdp": 62.4573294634195,
       "tradePctGdpYear": "2025",
+      "gdpGrowthPct": 1.38844207858726,
+      "gdpGrowthPctYear": "2025",
       "gdpRank": 5
     },
     "FRA": {
       "name": "France",
       "etf": "EWQ",
-      "iso3": "FRA"
+      "iso3": "FRA",
+      "gdpUsd": 3366315927447.33,
+      "gdpUsdYear": "2025",
+      "exportsPctGdp": 33.3928225145364,
+      "exportsPctGdpYear": "2025",
+      "importsPctGdp": 33.7995547693485,
+      "importsPctGdpYear": "2025",
+      "tradePctGdp": 67.1923772838849,
+      "tradePctGdpYear": "2025",
+      "gdpGrowthPct": 0.840949955479587,
+      "gdpGrowthPctYear": "2025",
+      "gdpRank": 7
     },
     "ITA": {
       "name": "Italy",
       "etf": "EWI",
       "iso3": "ITA",
+      "gdpUsd": 2551556954100.35,
+      "gdpUsdYear": "2025",
       "exportsPctGdp": 32.2270197272539,
       "exportsPctGdpYear": "2025",
+      "importsPctGdp": 30.2962066318587,
+      "importsPctGdpYear": "2025",
+      "tradePctGdp": 62.5232263591126,
+      "tradePctGdpYear": "2025",
       "gdpGrowthPct": 0.539583636778445,
-      "gdpGrowthPctYear": "2025"
+      "gdpGrowthPctYear": "2025",
+      "gdpRank": 8
     },
     "BRA": {
       "name": "Brazil",
       "etf": "EWZ",
       "iso3": "BRA",
+      "gdpUsd": 2279920092492.13,
+      "gdpUsdYear": "2025",
+      "exportsPctGdp": 17.8207228961707,
+      "exportsPctGdpYear": "2025",
       "importsPctGdp": 17.4707593653367,
       "importsPctGdpYear": "2025",
       "tradePctGdp": 35.2914822615074,
-      "tradePctGdpYear": "2025"
+      "tradePctGdpYear": "2025",
+      "gdpGrowthPct": 2.2857464902475,
+      "gdpGrowthPctYear": "2025",
+      "gdpRank": 10
     },
     "CAN": {
       "name": "Canada",
       "etf": "EWC",
       "iso3": "CAN",
+      "gdpUsd": 2319899772425.92,
+      "gdpUsdYear": "2025",
+      "exportsPctGdp": 31.3323868147182,
+      "exportsPctGdpYear": "2025",
+      "importsPctGdp": 32.1781181545045,
+      "importsPctGdpYear": "2025",
+      "tradePctGdp": 63.5105049692227,
+      "tradePctGdpYear": "2025",
       "gdpGrowthPct": 1.74268536175708,
-      "gdpGrowthPctYear": "2025"
+      "gdpGrowthPctYear": "2025",
+      "gdpRank": 9
     },
     "KOR": {
       "name": "South Korea",
@@ -142,7 +178,7 @@
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 1.00701840291242,
       "gdpGrowthPctYear": "2025",
-      "gdpRank": 8
+      "gdpRank": 12
     },
     "MEX": {
       "name": "Mexico",
@@ -156,7 +192,9 @@
       "importsPctGdpYear": "2025",
       "tradePctGdp": 79.9239525815655,
       "tradePctGdpYear": "2025",
-      "gdpRank": 9
+      "gdpGrowthPct": 0.561683456144578,
+      "gdpGrowthPctYear": "2025",
+      "gdpRank": 13
     },
     "AUS": {
       "name": "Australia",
@@ -164,13 +202,15 @@
       "iso3": "AUS",
       "gdpUsd": 1798518933689.21,
       "gdpUsdYear": "2025",
+      "exportsPctGdp": 23.2444383508997,
+      "exportsPctGdpYear": "2025",
       "importsPctGdp": 22.6570110371129,
       "importsPctGdpYear": "2025",
       "tradePctGdp": 45.9014493880126,
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 1.35039785076631,
       "gdpGrowthPctYear": "2025",
-      "gdpRank": 10
+      "gdpRank": 14
     },
     "ESP": {
       "name": "Spain",
@@ -182,25 +222,34 @@
       "exportsPctGdpYear": "2025",
       "importsPctGdp": 32.8133446186236,
       "importsPctGdpYear": "2025",
+      "tradePctGdp": 69.4508260073781,
+      "tradePctGdpYear": "2025",
       "gdpGrowthPct": 2.82495400578509,
       "gdpGrowthPctYear": "2025",
-      "gdpRank": 7
+      "gdpRank": 11
     },
     "IDN": {
       "name": "Indonesia",
       "etf": "EIDO",
       "iso3": "IDN",
+      "gdpUsd": 1445642584163.81,
+      "gdpUsdYear": "2025",
       "exportsPctGdp": 22.8465482987858,
       "exportsPctGdpYear": "2025",
       "importsPctGdp": 20.5446587523346,
       "importsPctGdpYear": "2025",
+      "tradePctGdp": 43.3912070511204,
+      "tradePctGdpYear": "2025",
       "gdpGrowthPct": 5.10808904438025,
-      "gdpGrowthPctYear": "2025"
+      "gdpGrowthPctYear": "2025",
+      "gdpRank": 15
     },
     "SAU": {
       "name": "Saudi Arabia",
       "etf": "KSA",
       "iso3": "SAU",
+      "gdpUsd": 1276942933333.33,
+      "gdpUsdYear": "2025",
       "exportsPctGdp": 29.7448740074211,
       "exportsPctGdpYear": "2025",
       "importsPctGdp": 28.1733498505598,
@@ -208,7 +257,8 @@
       "tradePctGdp": 57.9182238579808,
       "tradePctGdpYear": "2025",
       "gdpGrowthPct": 4.50246560191663,
-      "gdpGrowthPctYear": "2025"
+      "gdpGrowthPctYear": "2025",
+      "gdpRank": 16
     },
     "TWN": {
       "name": "Taiwan",
@@ -221,9 +271,9 @@
       "iso3": "CHE",
       "gdpUsd": 1043529899250.92,
       "gdpUsdYear": "2025",
-      "importsPctGdp": 69.109307845911,
-      "importsPctGdpYear": "2025",
-      "gdpRank": 11
+      "exportsPctGdp": 78.0527434720482,
+      "exportsPctGdpYear": "2025",
+      "gdpRank": 17
     }
   }
 }
