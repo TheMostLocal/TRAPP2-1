@@ -1,18 +1,18 @@
 {
   "_schema": "valuatio-fx-rates-v1",
   "_description": "USD-anchored FX rates, one convention per currency.",
-  "updatedAt": "2026-11-15T19:17:03.301797Z",
+  "updatedAt": "2026-11-15T19:32:03.370540Z",
   "base": "USD",
   "source": "fetch_fx.py (yfinance)",
   "rates": {
     "EUR": {
-      "usdPer": 1.10375273,
-      "perUsd": 0.906,
+      "usdPer": 1.10314393,
+      "perUsd": 0.9065,
       "pair": "EURUSD=X"
     },
     "GBP": {
-      "usdPer": 1.32074225,
-      "perUsd": 0.75715,
+      "usdPer": 1.32233155,
+      "perUsd": 0.75624,
       "pair": "GBPUSD=X"
     },
     "AUD": {
@@ -71,8 +71,8 @@
       "pair": "USDSGD=X"
     },
     "SEK": {
-      "usdPer": 0.09952328,
-      "perUsd": 10.0479,
+      "usdPer": 0.09952626,
+      "perUsd": 10.0476,
       "pair": "USDSEK=X"
     },
     "NOK": {
@@ -81,8 +81,8 @@
       "pair": "USDNOK=X"
     },
     "DKK": {
-      "usdPer": 0.14757534,
-      "perUsd": 6.7762,
+      "usdPer": 0.14757098,
+      "perUsd": 6.7764,
       "pair": "USDDKK=X"
     },
     "BRL": {
@@ -131,13 +131,13 @@
       "pair": "USDRUB=X"
     },
     "PLN": {
-      "usdPer": 0.25051983,
-      "perUsd": 3.9917,
+      "usdPer": 0.25049473,
+      "perUsd": 3.9921,
       "pair": "USDPLN=X"
     },
     "TRY": {
-      "usdPer": 0.01986235,
-      "perUsd": 50.3465,
+      "usdPer": 0.01986275,
+      "perUsd": 50.345501,
       "pair": "USDTRY=X"
     },
     "EGP": {
@@ -146,8 +146,8 @@
       "pair": "USDEGP=X"
     },
     "HUF": {
-      "usdPer": 0.00302197,
-      "perUsd": 330.910004,
+      "usdPer": 0.00302343,
+      "perUsd": 330.75,
       "pair": "USDHUF=X"
     },
     "CLP": {
@@ -161,8 +161,8 @@
       "pair": "USDPHP=X"
     },
     "CZK": {
-      "usdPer": 0.04522083,
-      "perUsd": 22.113701,
+      "usdPer": 0.04523045,
+      "perUsd": 22.108999,
       "pair": "USDCZK=X"
     },
     "COP": {
