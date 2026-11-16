@@ -1,12 +1,12 @@
 {
  "_schema": "valuatio-macro-quad/v2",
  "_description": "Growth/inflation quad (1 Goldilocks, 2 Reflation, 3 Stagflation, 4 Deflation). official = FRED GDPC1 + CPIAUCSL (lags ~1-2 months); nowcast = daily market rates of change; current = the nowcast while fresh, else official.",
- "generated_at": "2026-11-14T02:37:56+00:00",
+ "generated_at": "2026-11-16T22:30:15+00:00",
  "source": "FRED (GDPC1, CPIAUCSL) + market nowcast",
  "current": {
   "quad": 4,
   "label": "Deflation (growth\u2193 inflation\u2193)",
-  "asOf": "2026-11-13",
+  "asOf": "2026-11-16",
   "method": "market-nowcast",
   "source": "daily market ROC (oil, HY OAS, 2s10s, VIX, UST, USD)",
   "growthScore": -0.3602,
@@ -256,7 +256,7 @@
   ],
   "generated_at": "2026-11-13T20:54:36+00:00"
  },
- "nowcast_generated_at": "2026-11-14T02:37:56.518327+00:00",
+ "nowcast_generated_at": "2026-11-16T22:30:15.905339+00:00",
  "official": {
   "quad": 3,
   "label": "Stagflation (growth\u2193 inflation\u2191)",
@@ -286,7 +286,7 @@
  "nowcast": {
   "quad": 4,
   "label": "Deflation (growth\u2193 inflation\u2193)",
-  "asOf": "2026-11-13",
+  "asOf": "2026-11-16",
   "method": "market-nowcast",
   "source": "daily market ROC (oil, HY OAS, 2s10s, VIX, UST, USD)",
   "growthScore": -0.3602,
