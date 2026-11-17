@@ -187,14 +187,18 @@ def classify_instrument(ticker):
             "display_name": CRYPTO_NAMES.get(base, base),
         }
 
-    # === Index (^XXX, Yahoo foreign-exchange suffixes, special formats) ===
-    # Yahoo uses .SS (Shanghai), .ME (Moscow), .TA (Tel Aviv), .JO (Johannesburg),
-    # etc. for foreign-listed indexes that don't fit the ^XXX pattern.
-    INDEX_SUFFIXES = (".SS", ".HK", ".SZ", ".KS", ".KQ", ".SI", ".AX")
+    # === Index (^XXX, China's index codes, special formats) ===
+    # z191: an exchange suffix is a LISTED COMPANY on that exchange (005930.KS Samsung, 1211.HK BYD, 300750.SZ CATL).
+    # The old rule filed every .SS/.HK/.SZ/.KS/.KQ/.SI/.AX symbol as an index, so 17 companies were "Index" here -
+    # out of the bot's valuation medians and Research's equity grades while the app ranked them as stocks. Yahoo gives
+    # other markets' indices the ^ prefix (^HSI, ^KS11, ^AXJO); only China's are bare codes: Shanghai 000xxx.SS (its
+    # shares start with 6) and Shenzhen 399xxx.SZ (a 000xxx.SZ is a company there - Ping An Bank, BOE).
+    _base, _, _suf = t.rpartition(".")
+    _cn_index = (_suf == "SS" and _base.startswith("000")) or (_suf == "SZ" and _base.startswith("399"))
     if (t.startswith("^")
         or ".ME" in t
         or "-STRD" in t
-        or any(t.endswith(s) for s in INDEX_SUFFIXES)
+        or _cn_index
         or t == "DX-Y.NYB"):
         INDEX_MAP = {
             "^GSPC": "S&P 500", "^DJI": "Dow Jones", "^IXIC": "Nasdaq Composite",
