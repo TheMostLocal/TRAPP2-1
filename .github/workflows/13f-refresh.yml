@@ -6,6 +6,8 @@
 #  integrates the remote before pushing (ours wins on data/ conflicts),
 #  fixing the 'fetch first' rejection when it races the nightly.
 #  z180: SEC filings for all four equity books, one file per company (data/sec_filings/<T>.json) committed too.
+#  z199: the SEC contact (User-Agent) comes from the secret SEC_USER_AGENT - add it to THIS repo (Settings -> Secrets ->
+#        Actions; the same value TRAPP2-ANALYTICS uses). Without it both steps skip and keep the previous data.
 # ============================================================
 name: 13F Quarterly Refresh
 
@@ -37,9 +39,13 @@ jobs:
           python-version: "3.12"
 
       - name: Fetch 13F holdings
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT || vars.SEC_USER_AGENT }}   # z199: the SEC contact lives in a secret
         run: python pipeline/fetch_13f.py
 
       - name: Fetch company SEC filings (10-K/10-Q/8-K)
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT || vars.SEC_USER_AGENT }}
         run: python pipeline/fetch_sec_filings.py
         continue-on-error: true
 
