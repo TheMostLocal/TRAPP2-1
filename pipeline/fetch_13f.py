@@ -19,7 +19,7 @@ Option positions (PUT/CALL) are included and their value is shown as the
 reported market value (EDGAR reports the notional/market value of the option
 position in the `value` column), so they appear as regular market value.
 
-EDGAR requires a descriptive User-Agent with contact info — set EDGAR_UA below.
+EDGAR requires a descriptive User-Agent with contact info — set by the SEC_USER_AGENT secret (z199).
 
 Output path resolves to <repo-root>/data/13f/ regardless of where invoked.
 Requires: stdlib only (urllib, xml, json).
@@ -33,7 +33,9 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 # SEC requires a real User-Agent identifying you. EDIT THIS to your info.
-EDGAR_UA = "Collin McGough collinmcgough@gmail.com"
+# z199: the SEC contact comes from the Actions secret SEC_USER_AGENT (the same one TRAPP2-ANALYTICS uses) - never
+# hard-coded: this repo is public. Without it the script skips (keeps the previous data) instead of calling EDGAR.
+EDGAR_UA = (os.environ.get("SEC_USER_AGENT") or os.environ.get("EDGAR_UA") or "").strip()
 
 # Institutions to track: { "Display Name": "10-digit zero-padded CIK" }
 # Find a CIK at https://www.sec.gov/cgi-bin/browse-edgar (search the manager).
@@ -240,6 +242,9 @@ def diff_quarters(current, previous):
 
 
 def main():
+    if "@" not in EDGAR_UA:                       # z199: no contact, no EDGAR calls (SEC asks for one)
+        print("SEC_USER_AGENT not set (repo Settings -> Secrets -> Actions) - skipped; previous data kept", file=sys.stderr)
+        return
     os.makedirs(OUT_DIR, exist_ok=True)
     by_ticker = {}   # cusip -> [{institution, shares, value, change, option}]
     summary = []
