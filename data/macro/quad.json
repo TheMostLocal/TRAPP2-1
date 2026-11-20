@@ -1,7 +1,7 @@
 {
  "_schema": "valuatio-macro-quad/v2",
  "_description": "Growth/inflation quad (1 Goldilocks, 2 Reflation, 3 Stagflation, 4 Deflation). official = FRED GDPC1 + CPIAUCSL (lags ~1-2 months); nowcast = daily market rates of change; current = the nowcast while fresh, else official.",
- "generated_at": "2026-11-19T22:30:19+00:00",
+ "generated_at": "2026-11-20T03:40:18+00:00",
  "source": "FRED (GDPC1, CPIAUCSL) + market nowcast",
  "current": {
   "quad": 4,
@@ -9,8 +9,8 @@
   "asOf": "2026-11-19",
   "method": "market-nowcast",
   "source": "daily market ROC (oil, HY OAS, 2s10s, VIX, UST, USD)",
-  "growthScore": -0.6162,
-  "inflationScore": -0.5352,
+  "growthScore": -0.5469,
+  "inflationScore": -0.5075,
   "growthDir": "decelerating",
   "inflationDir": "decelerating",
   "confidence": 1.0,
@@ -35,16 +35,16 @@
     "value": 0.687
    },
    {
-    "signal": "T10Y2Y",
-    "value": -0.677
-   },
-   {
     "signal": "DCOILWTICO",
     "value": -0.656
    },
    {
     "signal": "DEXUSEU",
     "value": -0.65
+   },
+   {
+    "signal": "T10Y2Y",
+    "value": -0.4
    },
    {
     "signal": "DGS2",
@@ -58,7 +58,7 @@
   "asOfInputs": {
    "DCOILWTICO": "2026-11-17",
    "BAMLH0A0HYM2": "2026-11-18",
-   "T10Y2Y": "2026-11-18",
+   "T10Y2Y": "2026-11-19",
    "VIXCLS": "2026-11-18",
    "DGS10": "2026-11-18",
    "DGS2": "2026-11-18",
@@ -256,7 +256,7 @@
   ],
   "generated_at": "2026-11-19T22:10:25+00:00"
  },
- "nowcast_generated_at": "2026-11-19T22:30:19.623865+00:00",
+ "nowcast_generated_at": "2026-11-20T03:40:18.861444+00:00",
  "official": {
   "quad": 3,
   "label": "Stagflation (growth\u2193 inflation\u2191)",
@@ -289,8 +289,8 @@
   "asOf": "2026-11-19",
   "method": "market-nowcast",
   "source": "daily market ROC (oil, HY OAS, 2s10s, VIX, UST, USD)",
-  "growthScore": -0.6162,
-  "inflationScore": -0.5352,
+  "growthScore": -0.5469,
+  "inflationScore": -0.5075,
   "growthDir": "decelerating",
   "inflationDir": "decelerating",
   "confidence": 1.0,
@@ -315,16 +315,16 @@
     "value": 0.687
    },
    {
-    "signal": "T10Y2Y",
-    "value": -0.677
-   },
-   {
     "signal": "DCOILWTICO",
     "value": -0.656
    },
    {
     "signal": "DEXUSEU",
     "value": -0.65
+   },
+   {
+    "signal": "T10Y2Y",
+    "value": -0.4
    },
    {
     "signal": "DGS2",
@@ -338,7 +338,7 @@
   "asOfInputs": {
    "DCOILWTICO": "2026-11-17",
    "BAMLH0A0HYM2": "2026-11-18",
-   "T10Y2Y": "2026-11-18",
+   "T10Y2Y": "2026-11-19",
    "VIXCLS": "2026-11-18",
    "DGS10": "2026-11-18",
    "DGS2": "2026-11-18",
