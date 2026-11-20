@@ -26,7 +26,7 @@ ticker map uses), and ONE FILE PER COMPANY: data/sec_filings/<TICKER>.json (~4 K
 The combined data/sec_filings.json is still written (compact, no indentation) for bulk readers - the app no longer
 downloads it at startup. A company whose fetch fails keeps its previous file.
 
-EDGAR requires a descriptive User-Agent — set EDGAR_UA. Quarterly/monthly cadence
+EDGAR requires a descriptive User-Agent — set by the SEC_USER_AGENT secret (z199). Quarterly/monthly cadence
 is plenty since filings are infrequent. stdlib only.
 """
 import json
@@ -43,7 +43,9 @@ _GH_OWNER = (__import__("os").environ.get("VALUATIO_OWNER")
              or __import__("os").environ.get("GITHUB_REPOSITORY_OWNER")
              or "TheMostLocal").strip()
 
-EDGAR_UA = "Collin McGough collinmcgough@gmail.com"
+# z199: the SEC contact comes from the Actions secret SEC_USER_AGENT (the same one TRAPP2-ANALYTICS uses) - never
+# hard-coded: this repo is public. Without it the script skips (keeps the previous data) instead of calling EDGAR.
+EDGAR_UA = (os.environ.get("SEC_USER_AGENT") or os.environ.get("EDGAR_UA") or "").strip()
 
 # Forms worth surfacing. 10-K/10-Q = earnings (annual/quarterly), 8-K = material
 # events, others give a fuller picture. Keep the most recent N per company.
@@ -223,6 +225,9 @@ def _read_shard(tic):
 
 
 def main():
+    if "@" not in EDGAR_UA:                       # z199: no contact, no EDGAR calls (SEC asks for one)
+        print("SEC_USER_AGENT not set (repo Settings -> Secrets -> Actions) - skipped; previous data kept", file=sys.stderr)
+        return
     tickers = load_tickers()
     if not tickers:
         # Don't hard-fail — write an empty (but valid) file so the commit step
